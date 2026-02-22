@@ -6,22 +6,28 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Leaf, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Leaf, ArrowLeft, ArrowRight, Check, Phone } from "lucide-react";
 import { countries, roles, currencies } from "@/data/mock";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import PasswordStrength, { isPasswordStrong } from "@/components/PasswordStrength";
+import SignupCelebration from "@/components/SignupCelebration";
+import { useAuth } from "@/hooks/useAuth";
 
 const steps = ["Account", "Verify", "Location", "Role", "Currency"];
 
 const Signup = () => {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [country, setCountry] = useState("");
   const [county, setCounty] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [currency, setCurrency] = useState("");
+  const [showCelebration, setShowCelebration] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const selectedCountry = countries.find((c) => c.name === country);
 
@@ -29,16 +35,31 @@ const Signup = () => {
     setSelectedRoles((prev) => prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]);
   };
 
-  const handleFinish = () => navigate("/");
+  const handleFinish = () => {
+    login({
+      name: email.split("@")[0] || "User",
+      email,
+      initial: (email.charAt(0) || "U").toUpperCase(),
+      country,
+      county,
+      roles: selectedRoles,
+      currency,
+    });
+    setShowCelebration(true);
+  };
 
   const canNext = () => {
-    if (step === 0) return email && password;
+    if (step === 0) return email && password && isPasswordStrong(password);
     if (step === 1) return otp.length === 6;
     if (step === 2) return country && county;
     if (step === 3) return selectedRoles.length > 0;
     if (step === 4) return currency;
     return true;
   };
+
+  if (showCelebration) {
+    return <SignupCelebration onComplete={() => navigate("/")} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
@@ -48,10 +69,9 @@ const Signup = () => {
             <Leaf className="w-6 h-6 text-primary-foreground" />
           </div>
           <CardTitle className="font-display text-2xl">Create Account</CardTitle>
-          {/* Progress */}
           <div className="flex gap-1 justify-center mt-3">
             {steps.map((s, i) => (
-              <div key={s} className={`h-1.5 w-8 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
+              <div key={s} className={`h-1.5 w-8 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-muted"}`} />
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-1">{steps[step]}</p>
@@ -60,13 +80,21 @@ const Signup = () => {
           {step === 0 && (
             <div className="space-y-4">
               <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></div>
-              <div><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a strong password" /></div>
+              <div>
+                <Label className="flex items-center gap-1.5"><Phone className="w-3 h-3" />Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254 7XX XXX XXX" />
+              </div>
+              <div>
+                <Label>Password</Label>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a strong password" />
+                <PasswordStrength password={password} />
+              </div>
             </div>
           )}
 
           {step === 1 && (
             <div className="space-y-4 text-center">
-              <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to {email}</p>
+              <p className="text-sm text-muted-foreground">Enter the 6-digit verification code sent to {email}</p>
               <div className="flex justify-center">
                 <InputOTP maxLength={6} value={otp} onChange={setOtp}>
                   <InputOTPGroup>
@@ -74,7 +102,7 @@ const Signup = () => {
                   </InputOTPGroup>
                 </InputOTP>
               </div>
-              <p className="text-xs text-muted-foreground">(Demo: enter any 6 digits)</p>
+              <p className="text-xs text-muted-foreground">Didn't receive it? <button className="text-primary font-semibold hover:underline">Resend code</button></p>
             </div>
           )}
 
@@ -84,7 +112,13 @@ const Signup = () => {
                 <Label>Country</Label>
                 <Select value={country} onValueChange={(v) => { setCountry(v); setCounty(""); }}>
                   <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                  <SelectContent>{countries.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>
+                    {countries.map((c) => (
+                      <SelectItem key={c.name} value={c.name}>
+                        {c.flag} {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               {selectedCountry && (
@@ -123,7 +157,13 @@ const Signup = () => {
               <Label>Preferred Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
-                <SelectContent>{currencies.map((c) => <SelectItem key={c.code} value={c.code}>{c.symbol} {c.name} ({c.code})</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {currencies.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.flag} {c.symbol} {c.name} ({c.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           )}

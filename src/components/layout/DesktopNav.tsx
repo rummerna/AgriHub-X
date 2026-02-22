@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf } from "lucide-react";
+import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { to: "/marketplace", label: "Marketplace", icon: ShoppingCart },
@@ -12,6 +13,7 @@ const navLinks = [
 
 const DesktopNav = () => {
   const location = useLocation();
+  const { isLoggedIn, user, logout } = useAuth();
 
   return (
     <header className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border sticky top-0 z-50">
@@ -54,11 +56,29 @@ const DesktopNav = () => {
             <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
           </Button>
         </Link>
-        <Link to="/profile">
-          <Button variant="ghost" size="icon">
-            <User className="w-5 h-5" />
-          </Button>
-        </Link>
+        {isLoggedIn ? (
+          <>
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" className="relative">
+                <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-xs font-bold text-primary-foreground">
+                  {user?.initial || "U"}
+                </div>
+              </Button>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={logout} title="Sign out">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link to="/auth/login">
+              <Button variant="ghost" size="sm">Sign In</Button>
+            </Link>
+            <Link to="/auth/signup">
+              <Button size="sm">Join Free</Button>
+            </Link>
+          </>
+        )}
       </nav>
     </header>
   );

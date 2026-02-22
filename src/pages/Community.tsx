@@ -19,14 +19,19 @@ const Community = () => {
         {/* Feed */}
         <div className="md:col-span-2 space-y-4">
           {communityPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-md transition-shadow">
+            <Card key={post.id} className="hover:shadow-md transition-all hover:-translate-y-0.5">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-primary">
                     {post.author.charAt(0)}
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm">{post.author}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm">{post.author}</p>
+                      {"isDemo" in post && post.isDemo && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">DEMO</Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{post.county}, {post.country} · {post.time}</p>
                   </div>
                 </div>
@@ -66,6 +71,7 @@ const Community = () => {
               <h3 className="font-semibold text-sm">⚠️ Alerts</h3>
               <p className="text-xs text-muted-foreground">🌧️ Rain expected in Machakos tomorrow</p>
               <p className="text-xs text-muted-foreground">🐛 Fall armyworm alert in Kisumu</p>
+              <p className="text-xs text-muted-foreground">☕ Coffee berry disease rising in highlands</p>
             </CardContent>
           </Card>
         </aside>
