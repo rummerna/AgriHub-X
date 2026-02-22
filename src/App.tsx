@@ -23,6 +23,7 @@ import Terms from "./pages/Terms";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import NotFound from "./pages/NotFound";
+import Brief from "./pages/Brief";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/brief" element={<Brief />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
