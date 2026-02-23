@@ -27,10 +27,29 @@ const About = () => {
       <section className="text-center mb-12">
         <Badge className="mb-3">Our Story</Badge>
         <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Born from a Dying Pawpaw Tree</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          When Blessed Muriuki's pawpaw tree began dying, he searched for reliable agricultural information — and found none.
-          That frustration sparked an idea: what if every farmer had access to trusted advice, a fair marketplace, and a supportive community?
-          AgriHubX was born.
+        <p className="text-muted-foreground max-w-2xl mx-auto">When Blessed Muriuki's pawpaw tree began dying, he searched for reliable agricultural information — and found none. That frustration sparked an idea: what if every farmer had access to trusted advice, a fair marketplace, and a supportive community? AgriHubX was born.
+ Nixon Magenda is a young innovator who believes big ideas don’t need perfect conditions  just vision, discipline and relentless execution. Working primarily from home,
+ he dedicated countless hours to building and refining AgriHubX, constantly learning, testing and improving the platform step by step with a clear focus on excellence and international standards. He is driven by a simple belief: technology should solve real problems for real people. After listening closely to farmers and understanding the challenges they face, Nixon committed himself to creating a platform that is practical, trustworthy, globally scalable and privacy-first. AgriHubX reflects his forward-thinking mindset — building clean, powerful systems that create opportunity, trust and global agricultural connection without compromising user privacy.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </p>
       </section>
 
@@ -58,8 +77,7 @@ const About = () => {
       <section className="mb-12">
         <h2 className="text-2xl font-display font-bold text-center mb-6">What Makes Us Different</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {differentiators.map(({ icon: Icon, label, desc }) =>
-          <Card key={label}>
+          {differentiators.map(({ icon: Icon, label, desc }) => <Card key={label}>
               <CardContent className="p-4 flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <Icon className="w-5 h-5 text-primary" />
@@ -69,8 +87,7 @@ const About = () => {
                   <p className="text-xs text-muted-foreground">{desc}</p>
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>)}
         </div>
       </section>
 
@@ -78,12 +95,10 @@ const About = () => {
       <section className="mb-8">
         <h2 className="text-2xl font-display font-bold text-center mb-6">Our Values</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {values.map((v) =>
-          <div key={v.title} className="p-4 rounded-xl bg-muted">
+          {values.map((v) => <div key={v.title} className="p-4 rounded-xl bg-muted">
               <h4 className="font-semibold text-sm">{v.title}</h4>
               <p className="text-xs text-muted-foreground">{v.desc}</p>
-            </div>
-          )}
+            </div>)}
         </div>
       </section>
 
@@ -92,8 +107,4 @@ const About = () => {
         <p className="text-sm text-muted-foreground">Proudly supported by <strong>St. John Tala High School</strong></p>
         <p className="text-xs text-muted-foreground mt-1">© 2026 Nixon Magenda & Blessed Muriuki. All rights reserved.</p>
       </section>
-    </div>);
-
-};
-
-export default About;
+    </div>);};export default About;
