@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      posts: {
+        Row: {
+          comments: number | null
+          content: string
+          created_at: string
+          id: string
+          likes: number | null
+          user_id: string
+        }
+        Insert: {
+          comments?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          likes?: number | null
+          user_id: string
+        }
+        Update: {
+          comments?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          likes?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string
+          country: string | null
+          county: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          has_transport: boolean | null
+          id: string
+          image_url: string | null
+          min_order: number | null
+          price: number
+          quality_grade: string | null
+          quantity: number | null
+          title: string
+          unit: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          has_transport?: boolean | null
+          id?: string
+          image_url?: string | null
+          min_order?: number | null
+          price: number
+          quality_grade?: string | null
+          quantity?: number | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          has_transport?: boolean | null
+          id?: string
+          image_url?: string | null
+          min_order?: number | null
+          price?: number
+          quality_grade?: string | null
+          quantity?: number | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          country: string | null
+          county: string | null
+          created_at: string
+          currency: string | null
+          email: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          answers: number | null
+          body: string | null
+          created_at: string
+          id: string
+          tags: string[] | null
+          title: string
+          user_id: string
+          votes: number | null
+        }
+        Insert: {
+          answers?: number | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title: string
+          user_id: string
+          votes?: number | null
+        }
+        Update: {
+          answers?: number | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title?: string
+          user_id?: string
+          votes?: number | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +205,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "farmer"
+        | "buyer"
+        | "supplier"
+        | "transporter"
+        | "vet"
+        | "agronomist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +338,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "farmer",
+        "buyer",
+        "supplier",
+        "transporter",
+        "vet",
+        "agronomist",
+      ],
+    },
   },
 } as const

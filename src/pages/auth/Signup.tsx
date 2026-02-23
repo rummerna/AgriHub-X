@@ -6,28 +6,31 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Leaf, ArrowLeft, ArrowRight, Check, Phone } from "lucide-react";
+import { Leaf, ArrowLeft, ArrowRight, Check, Phone, Loader2 } from "lucide-react";
 import { countries, roles, currencies } from "@/data/mock";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import PasswordStrength, { isPasswordStrong } from "@/components/PasswordStrength";
 import SignupCelebration from "@/components/SignupCelebration";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
-const steps = ["Account", "Verify", "Location", "Role", "Currency"];
+const steps = ["Account", "Location", "Role", "Currency"];
 
 const Signup = () => {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
+  const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState("");
   const [county, setCounty] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [currency, setCurrency] = useState("");
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup, updateProfile, setRoles, login } = useAuth();
+  const { toast } = useToast();
 
   const selectedCountry = countries.find((c) => c.name === country);
 
@@ -35,26 +38,73 @@ const Signup = () => {
     setSelectedRoles((prev) => prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]);
   };
 
-  const handleFinish = () => {
-    login({
-      name: email.split("@")[0] || "User",
-      email,
-      initial: (email.charAt(0) || "U").toUpperCase(),
-      country,
-      county,
-      roles: selectedRoles,
-      currency,
-    });
-    setShowCelebration(true);
+  const handleCreateAccount = async () => {
+    setIsLoading(true);
+    try {
+      await signup(email, password, { full_name: fullName, phone });
+      // Try auto sign-in (works if auto-confirm is enabled)
+      try {
+        await login(email, password);
+      } catch {
+        // If login fails, email confirmation may be required
+        toast({
+          title: "Check your email",
+          description: "We sent you a confirmation link. Please verify your email, then sign in.",
+        });
+        return;
+      }
+      setSignupDone(true);
+      setStep(1);
+    } catch (error: any) {
+      toast({
+        title: "Signup failed",
+        description: error.message || "Could not create account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFinish = async () => {
+    setIsLoading(true);
+    try {
+      await updateProfile({ country, county, currency, full_name: fullName, phone });
+      // Filter to only valid enum roles
+      const validRoles = selectedRoles.filter(r => 
+        ['farmer', 'buyer', 'supplier', 'transporter', 'vet', 'agronomist'].includes(r.toLowerCase())
+      );
+      if (validRoles.length > 0) {
+        await setRoles(validRoles.map(r => r.toLowerCase()));
+      }
+      setShowCelebration(true);
+    } catch (error: any) {
+      toast({
+        title: "Profile setup failed",
+        description: error.message || "Could not save your profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const canNext = () => {
-    if (step === 0) return email && password && isPasswordStrong(password);
-    if (step === 1) return otp.length === 6;
-    if (step === 2) return country && county;
-    if (step === 3) return selectedRoles.length > 0;
-    if (step === 4) return currency;
+    if (step === 0) return email && fullName && password && isPasswordStrong(password) && !isLoading;
+    if (step === 1) return country && county;
+    if (step === 2) return selectedRoles.length > 0;
+    if (step === 3) return currency;
     return true;
+  };
+
+  const handleNext = () => {
+    if (step === 0 && !signupDone) {
+      handleCreateAccount();
+    } else if (step < 3) {
+      setStep(step + 1);
+    } else {
+      handleFinish();
+    }
   };
 
   if (showCelebration) {
@@ -79,6 +129,7 @@ const Signup = () => {
         <CardContent>
           {step === 0 && (
             <div className="space-y-4">
+              <div><Label>Full Name</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" /></div>
               <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></div>
               <div>
                 <Label className="flex items-center gap-1.5"><Phone className="w-3 h-3" />Phone <span className="text-muted-foreground font-normal">(optional)</span></Label>
@@ -93,20 +144,6 @@ const Signup = () => {
           )}
 
           {step === 1 && (
-            <div className="space-y-4 text-center">
-              <p className="text-sm text-muted-foreground">Enter the 6-digit verification code sent to {email}</p>
-              <div className="flex justify-center">
-                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                  <InputOTPGroup>
-                    {[0,1,2,3,4,5].map((i) => <InputOTPSlot key={i} index={i} />)}
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-              <p className="text-xs text-muted-foreground">Didn't receive it? <button className="text-primary font-semibold hover:underline">Resend code</button></p>
-            </div>
-          )}
-
-          {step === 2 && (
             <div className="space-y-4">
               <div>
                 <Label>Country</Label>
@@ -114,9 +151,7 @@ const Signup = () => {
                   <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
                   <SelectContent>
                     {countries.map((c) => (
-                      <SelectItem key={c.name} value={c.name}>
-                        {c.flag} {c.name}
-                      </SelectItem>
+                      <SelectItem key={c.name} value={c.name}>{c.flag} {c.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -133,7 +168,7 @@ const Signup = () => {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">Select your role(s)</p>
               <div className="flex flex-wrap gap-2">
@@ -152,16 +187,14 @@ const Signup = () => {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <div className="space-y-4">
               <Label>Preferred Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger><SelectValue placeholder="Select currency" /></SelectTrigger>
                 <SelectContent>
                   {currencies.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.flag} {c.symbol} {c.name} ({c.code})
-                    </SelectItem>
+                    <SelectItem key={c.code} value={c.code}>{c.flag} {c.symbol} {c.name} ({c.code})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -170,8 +203,14 @@ const Signup = () => {
 
           <div className="flex gap-2 mt-6">
             {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)} className="gap-1"><ArrowLeft className="w-4 h-4" /> Back</Button>}
-            <Button className="flex-1 gap-1" disabled={!canNext()} onClick={step < 4 ? () => setStep(step + 1) : handleFinish}>
-              {step < 4 ? <>Next <ArrowRight className="w-4 h-4" /></> : <>Get Started <Check className="w-4 h-4" /></>}
+            <Button className="flex-1 gap-1" disabled={!canNext()} onClick={handleNext}>
+              {isLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Please wait...</>
+              ) : step < 3 ? (
+                <>{step === 0 && !signupDone ? "Create Account" : "Next"} <ArrowRight className="w-4 h-4" /></>
+              ) : (
+                <>Get Started <Check className="w-4 h-4" /></>
+              )}
             </Button>
           </div>
 
