@@ -65,7 +65,7 @@ const DesktopNav = () => {
                 </div>
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" onClick={logout} title="Sign out">
+            <Button variant="ghost" size="icon" onClick={() => logout()} title="Sign out">
               <LogOut className="w-4 h-4" />
             </Button>
           </>
