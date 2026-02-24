@@ -1,10 +1,88 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, MessageCircle, Plus } from "lucide-react";
-import { communityPosts, trendingTopics } from "@/data/mock";
+import { Textarea } from "@/components/ui/textarea";
+import { ThumbsUp, MessageCircle, Plus, Loader2, X } from "lucide-react";
+import { communityPosts as mockPosts, trendingTopics } from "@/data/mock";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+
+interface Post {
+  id: string;
+  author: string;
+  county: string;
+  country: string;
+  content: string;
+  tags: string[];
+  upvotes: number;
+  comments: number;
+  time: string;
+  isDemo?: boolean;
+}
 
 const Community = () => {
+  const [dbPosts, setDbPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showNew, setShowNew] = useState(false);
+  const [newContent, setNewContent] = useState("");
+  const [posting, setPosting] = useState(false);
+  const { isLoggedIn, supabaseUser, user } = useAuth();
+  const { toast } = useToast();
+
+  const fetchPosts = async () => {
+    const { data } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) {
+      const userIds = [...new Set(data.map(p => p.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, country, county").in("user_id", userIds);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+      setDbPosts(data.map((p) => {
+        const prof = profileMap.get(p.user_id);
+        return {
+          id: p.id,
+          author: prof?.full_name || "Unknown",
+          county: prof?.county || "",
+          country: prof?.country || "",
+          content: p.content,
+          tags: [],
+          upvotes: p.likes || 0,
+          comments: p.comments || 0,
+          time: new Date(p.created_at).toLocaleDateString(),
+        };
+      }));
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchPosts(); }, []);
+
+  const handlePost = async () => {
+    if (!supabaseUser || !newContent.trim()) return;
+    setPosting(true);
+    const { error } = await supabase.from("posts").insert({
+      user_id: supabaseUser.id,
+      content: newContent.trim(),
+    });
+    if (error) {
+      toast({ title: "Failed to post", description: error.message, variant: "destructive" });
+    } else {
+      setNewContent("");
+      setShowNew(false);
+      toast({ title: "Post published!" });
+      fetchPosts();
+    }
+    setPosting(false);
+  };
+
+  // Merge DB posts with mock (DB first)
+  const allPosts = [...dbPosts, ...mockPosts.filter(mp => !dbPosts.some(dp => dp.content === mp.content))];
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -12,46 +90,73 @@ const Community = () => {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Agri Community</h1>
           <p className="text-muted-foreground text-sm">Connect with farmers in your region</p>
         </div>
-        <Button className="gap-1.5"><Plus className="w-4 h-4" /> New Post</Button>
+        <Button className="gap-1.5" onClick={() => setShowNew(!showNew)}>
+          {showNew ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          {showNew ? "Cancel" : "New Post"}
+        </Button>
       </div>
+
+      {showNew && (
+        <Card className="mb-6">
+          <CardContent className="p-4 space-y-3">
+            <Textarea
+              value={newContent}
+              onChange={e => setNewContent(e.target.value)}
+              placeholder="Share something with the community..."
+              rows={3}
+            />
+            <div className="flex justify-end">
+              <Button onClick={handlePost} disabled={posting || !newContent.trim() || !isLoggedIn}>
+                {posting ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Posting...</> : "Post"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* Feed */}
         <div className="md:col-span-2 space-y-4">
-          {communityPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-md transition-all hover:-translate-y-0.5">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-primary">
-                    {post.author.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">{post.author}</p>
-                      {"isDemo" in post && post.isDemo && (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">DEMO</Badge>
-                      )}
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : (
+            allPosts.map((post) => (
+              <Card key={post.id} className="hover:shadow-md transition-all hover:-translate-y-0.5">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-primary">
+                      {post.author.charAt(0)}
                     </div>
-                    <p className="text-xs text-muted-foreground">{post.county}, {post.country} · {post.time}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm">{post.author}</p>
+                        {post.isDemo && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">DEMO</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{post.county}{post.county && post.country ? ", " : ""}{post.country} · {post.time}</p>
+                    </div>
                   </div>
-                </div>
-                <p className="text-sm mb-3">{post.content}</p>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                  ))}
-                </div>
-                <div className="flex gap-4 text-sm text-muted-foreground">
-                  <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                    <ThumbsUp className="w-4 h-4" /> {post.upvotes}
-                  </button>
-                  <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                    <MessageCircle className="w-4 h-4" /> {post.comments}
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <p className="text-sm mb-3">{post.content}</p>
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {post.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-4 text-sm text-muted-foreground">
+                    <button className="flex items-center gap-1 hover:text-primary transition-colors">
+                      <ThumbsUp className="w-4 h-4" /> {post.upvotes}
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-primary transition-colors">
+                      <MessageCircle className="w-4 h-4" /> {post.comments}
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Sidebar */}
