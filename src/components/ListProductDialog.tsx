@@ -5,21 +5,74 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Camera } from "lucide-react";
+import { Plus, Camera, Loader2 } from "lucide-react";
 import { marketplaceCategories, currencies } from "@/data/mock";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const units = ["kg", "tonnes", "bags", "crates", "pieces", "litres", "bundles", "bales"];
 const grades = ["Grade A (Premium)", "Grade B (Standard)", "Grade C (Economy)", "Ungraded"];
 
-const ListProductDialog = () => {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
+interface Props {
+  onProductListed?: () => void;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+const ListProductDialog = ({ onProductListed }: Props) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [grade, setGrade] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [unit, setUnit] = useState("kg");
+  const [minOrder, setMinOrder] = useState("");
+  const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState("KES");
+  const [description, setDescription] = useState("");
+  const [hasTransport, setHasTransport] = useState(false);
+  const { toast } = useToast();
+  const { isLoggedIn, supabaseUser, user } = useAuth();
+
+  const resetForm = () => {
+    setTitle(""); setCategory(""); setGrade(""); setQuantity("");
+    setUnit("kg"); setMinOrder(""); setPrice(""); setCurrency("KES");
+    setDescription(""); setHasTransport(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Product listed!", description: "Your product is now visible on the marketplace." });
-    setOpen(false);
+    if (!isLoggedIn || !supabaseUser) {
+      toast({ title: "Sign in required", description: "Please sign in to list a product.", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.from("products").insert({
+      user_id: supabaseUser.id,
+      title,
+      category,
+      quality_grade: grade || "Ungraded",
+      quantity: quantity ? parseInt(quantity) : 1,
+      unit,
+      min_order: minOrder ? parseInt(minOrder) : 1,
+      price: parseFloat(price),
+      currency,
+      description,
+      has_transport: hasTransport,
+      country: user?.country || "",
+      county: user?.county || "",
+    });
+
+    setLoading(false);
+    if (error) {
+      toast({ title: "Failed to list product", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Product listed!", description: "Your product is now visible on the marketplace." });
+      resetForm();
+      setOpen(false);
+      onProductListed?.();
+    }
   };
 
   return (
@@ -36,12 +89,12 @@ const ListProductDialog = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Product Name</Label>
-            <Input placeholder="e.g. Fresh Maize (50kg)" required />
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Fresh Maize (50kg)" required />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Category</Label>
-              <Select required>
+              <Select value={category} onValueChange={setCategory} required>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
                   {marketplaceCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -50,7 +103,7 @@ const ListProductDialog = () => {
             </div>
             <div>
               <Label>Quality Grade</Label>
-              <Select>
+              <Select value={grade} onValueChange={setGrade}>
                 <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
                   {grades.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
@@ -61,11 +114,11 @@ const ListProductDialog = () => {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <Label>Quantity</Label>
-              <Input type="number" placeholder="100" required />
+              <Input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="100" required />
             </div>
             <div>
               <Label>Unit</Label>
-              <Select>
+              <Select value={unit} onValueChange={setUnit}>
                 <SelectTrigger><SelectValue placeholder="Unit" /></SelectTrigger>
                 <SelectContent>
                   {units.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
@@ -74,17 +127,17 @@ const ListProductDialog = () => {
             </div>
             <div>
               <Label>Min Order</Label>
-              <Input type="number" placeholder="10" />
+              <Input type="number" value={minOrder} onChange={e => setMinOrder(e.target.value)} placeholder="10" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Price</Label>
-              <Input type="number" placeholder="3500" required />
+              <Input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="3500" required />
             </div>
             <div>
               <Label>Currency</Label>
-              <Select>
+              <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger><SelectValue placeholder="Currency" /></SelectTrigger>
                 <SelectContent>
                   {currencies.map((c) => <SelectItem key={c.code} value={c.code}>{c.flag} {c.code}</SelectItem>)}
@@ -94,7 +147,7 @@ const ListProductDialog = () => {
           </div>
           <div>
             <Label>Description</Label>
-            <Textarea placeholder="Describe your product quality, harvest date, availability..." rows={3} />
+            <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your product quality, harvest date, availability..." rows={3} />
           </div>
           <div>
             <Label>Photos</Label>
@@ -105,10 +158,12 @@ const ListProductDialog = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="transport" className="rounded" />
+            <input type="checkbox" id="transport" className="rounded" checked={hasTransport} onChange={e => setHasTransport(e.target.checked)} />
             <Label htmlFor="transport" className="text-sm font-normal">I can arrange transport / delivery</Label>
           </div>
-          <Button type="submit" className="w-full">Publish Listing</Button>
+          <Button type="submit" className="w-full" disabled={loading || !title || !category || !price}>
+            {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Publishing...</> : "Publish Listing"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
