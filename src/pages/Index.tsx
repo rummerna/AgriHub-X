@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Users, HelpCircle, Wrench, CloudRain, TrendingUp, Bug, Lightbulb, Shield, LogIn } from "lucide-react";
-import { weatherData } from "@/data/mock";
+import { ShoppingCart, Users, HelpCircle, Wrench, CloudRain, TrendingUp, Bug, Lightbulb, Shield, Droplets, Wind } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSeason } from "@/hooks/useSeason";
+import { aggregateWeather, getWeatherTip } from "@/data/weatherSources";
 
 const quickActions = [
   { to: "/marketplace", label: "Marketplace", desc: "Browse crops, livestock, fertilizers, and equipment", icon: ShoppingCart, color: "bg-primary" },
@@ -23,6 +23,8 @@ const seasonGradients: Record<string, string> = {
 const Index = () => {
   const { isLoggedIn, user } = useAuth();
   const season = useSeason(user?.country);
+  const weather = aggregateWeather(user?.county || "Machakos");
+  const weatherTip = getWeatherTip(weather);
 
   return (
     <div className={`max-w-6xl mx-auto px-4 bg-gradient-to-b ${seasonGradients[season]} min-h-screen`}>
@@ -56,7 +58,7 @@ const Index = () => {
             <CardTitle className="text-lg flex items-center gap-2">🌤️ Daily Farm Brief</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-sm"><CloudRain className="w-4 h-4 text-primary" /> <span>Weather: Light rain expected tomorrow</span></div>
+            <div className="flex items-center gap-2 text-sm"><CloudRain className="w-4 h-4 text-primary" /> <span>{weatherTip}</span></div>
             <div className="flex items-center gap-2 text-sm"><Lightbulb className="w-4 h-4 text-accent" /> <span>Tip: Delay fertilizer application today</span></div>
             <div className="flex items-center gap-2 text-sm"><TrendingUp className="w-4 h-4 text-secondary" /> <span>Price: Maize ↑ 5% this week</span></div>
             <div className="flex items-center gap-2 text-sm"><Bug className="w-4 h-4 text-destructive" /> <span>Alert: Pest outbreak reported nearby</span></div>
@@ -64,32 +66,39 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Weather in {weatherData.county}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-4xl font-bold font-display">{weatherData.temperature}°C</p>
-                <p className="text-sm text-muted-foreground">{weatherData.condition}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Rain probability</p>
-                <p className="text-2xl font-bold text-primary">{weatherData.rainProbability}%</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs">
-              {weatherData.forecast.map((d) => (
-                <div key={d.day} className="space-y-1">
-                  <p className="font-medium text-muted-foreground">{d.day}</p>
-                  <p className="text-lg">{d.icon}</p>
-                  <p className="font-medium">{d.temp}°</p>
+        <Link to="/weather" className="block">
+          <Card className="shadow-md h-full hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Weather in {weather.county}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl">{weather.icon}</span>
+                  <div>
+                    <p className="text-4xl font-bold font-display">{weather.tempAvg}°C</p>
+                    <p className="text-sm text-muted-foreground">Feels like {weather.feelsLike}°C</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="text-right space-y-1">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end"><CloudRain className="w-3.5 h-3.5" /> Rain: {weather.rainProbability}%</p>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end"><Droplets className="w-3.5 h-3.5" /> Humidity: {weather.humidity}%</p>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 justify-end"><Wind className="w-3.5 h-3.5" /> {weather.windSpeed} km/h</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 gap-1 text-center text-xs border-t border-border pt-3">
+                {weather.daily.slice(0, 7).map((d) => (
+                  <div key={d.day} className="space-y-1">
+                    <p className="font-medium text-muted-foreground">{d.day}</p>
+                    <p className="text-lg">{d.icon}</p>
+                    <p className="font-medium">{d.high}°/{d.low}°</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-primary text-center mt-3 font-medium">View full forecast →</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Quick Actions */}

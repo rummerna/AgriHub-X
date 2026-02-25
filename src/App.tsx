@@ -24,6 +24,7 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import NotFound from "./pages/NotFound";
 import Brief from "./pages/Brief";
+import Weather from "./pages/Weather";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/brief" element={<Brief />} />
+            <Route path="/weather" element={<Weather />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

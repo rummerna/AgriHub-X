@@ -1,11 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CloudRain, TrendingUp, TrendingDown, Bug, Lightbulb, Users, AlertTriangle } from "lucide-react";
-import { dailyBriefData, weatherData } from "@/data/mock";
+import { dailyBriefData } from "@/data/mock";
+import { aggregateWeather, getWeatherTip } from "@/data/weatherSources";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const severityColors = { high: "bg-destructive text-destructive-foreground", medium: "bg-accent text-accent-foreground", low: "bg-muted text-muted-foreground" };
 
 const Brief = () => {
+  const { user } = useAuth();
+  const weather = aggregateWeather(user?.county || "Machakos");
+  const weatherTip = getWeatherTip(weather);
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-2xl md:text-3xl font-display font-bold mb-1">🌤️ Daily Farm Brief</h1>
@@ -18,19 +26,23 @@ const Brief = () => {
             <CardTitle className="text-lg flex items-center gap-2"><CloudRain className="w-5 h-5 text-primary" />Weather Update</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+              <p className="text-sm font-medium">{weatherTip}</p>
+            </div>
             <p className="text-sm">{dailyBriefData.weather.summary}</p>
             <div className="bg-muted p-3 rounded-lg">
               <p className="text-sm font-medium">⚠️ Advisory: {dailyBriefData.weather.advisory}</p>
             </div>
             <div className="grid grid-cols-7 gap-1 text-center text-xs">
-              {weatherData.forecast.map((d) => (
+              {weather.daily.map((d) => (
                 <div key={d.day} className="space-y-1">
                   <p className="font-medium text-muted-foreground">{d.day}</p>
                   <p className="text-lg">{d.icon}</p>
-                  <p className="font-medium">{d.temp}°</p>
+                  <p className="font-medium">{d.high}°/{d.low}°</p>
                 </div>
               ))}
             </div>
+            <Link to="/weather"><Button variant="outline" size="sm" className="w-full">View Full Weather →</Button></Link>
           </CardContent>
         </Card>
 
