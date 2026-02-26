@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, Bookmark, MapPin, Search, Loader2 } from "lucide-react";
+import { MessageCircle, Bookmark, MapPin, Search, Loader2, Gavel } from "lucide-react";
 import { products as mockProducts, paymentMethods } from "@/data/mock";
 import ListProductDialog from "@/components/ListProductDialog";
 import ProductDetail from "@/components/ProductDetail";
@@ -76,7 +77,14 @@ const Marketplace = () => {
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl md:text-3xl font-display font-bold">Marketplace</h1>
-        <ListProductDialog onProductListed={fetchProducts} />
+        <div className="flex gap-2">
+          <Link to="/auctions">
+            <Button variant="outline" className="gap-1.5">
+              <Gavel className="w-4 h-4" /> Live Auctions
+            </Button>
+          </Link>
+          <ListProductDialog onProductListed={fetchProducts} />
+        </div>
       </div>
       <p className="text-muted-foreground mb-4 text-sm">Browse crops, livestock, inputs, and equipment</p>
 

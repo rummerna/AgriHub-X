@@ -14,6 +14,163 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_integrity: {
+        Row: {
+          id: string
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      auction_watchers: {
+        Row: {
+          auction_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          auction_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          auction_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_watchers_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auctions: {
+        Row: {
+          bids_count: number
+          category: string
+          country: string | null
+          county: string | null
+          created_at: string
+          currency: string | null
+          current_bid: number | null
+          current_winner_id: string | null
+          description: string | null
+          end_time: string
+          id: string
+          image_url: string | null
+          product_name: string
+          quantity: number
+          reserve_price: number | null
+          seller_id: string
+          start_time: string
+          starting_bid: number
+          status: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          bids_count?: number
+          category: string
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          current_bid?: number | null
+          current_winner_id?: string | null
+          description?: string | null
+          end_time: string
+          id?: string
+          image_url?: string | null
+          product_name: string
+          quantity?: number
+          reserve_price?: number | null
+          seller_id: string
+          start_time?: string
+          starting_bid: number
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          bids_count?: number
+          category?: string
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          currency?: string | null
+          current_bid?: number | null
+          current_winner_id?: string | null
+          description?: string | null
+          end_time?: string
+          id?: string
+          image_url?: string | null
+          product_name?: string
+          quantity?: number
+          reserve_price?: number | null
+          seller_id?: string
+          start_time?: string
+          starting_bid?: number
+          status?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at: string
+          id: string
+          is_auto_bid: boolean
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          bidder_id: string
+          created_at?: string
+          id?: string
+          is_auto_bid?: boolean
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          bidder_id?: string
+          created_at?: string
+          id?: string
+          is_auto_bid?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "auctions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           comments: number | null
