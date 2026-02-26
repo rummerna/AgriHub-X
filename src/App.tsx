@@ -25,6 +25,8 @@ import Signup from "./pages/auth/Signup";
 import NotFound from "./pages/NotFound";
 import Brief from "./pages/Brief";
 import Weather from "./pages/Weather";
+import Auctions from "./pages/Auctions";
+import AuctionDetail from "./pages/AuctionDetail";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,8 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/brief" element={<Brief />} />
             <Route path="/weather" element={<Weather />} />
+            <Route path="/auctions" element={<Auctions />} />
+            <Route path="/auctions/:id" element={<AuctionDetail />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
