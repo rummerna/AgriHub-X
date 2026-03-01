@@ -171,6 +171,93 @@ export type Database = {
           },
         ]
       }
+      crop_thresholds: {
+        Row: {
+          base_yield_per_acre: number
+          crop_name: string
+          id: string
+          optimal_rainfall_max: number
+          optimal_rainfall_min: number
+          optimal_temp_max: number
+          optimal_temp_min: number
+          pest_susceptibility_index: number
+          water_requirement_per_acre: number
+          yield_unit: string
+        }
+        Insert: {
+          base_yield_per_acre?: number
+          crop_name: string
+          id?: string
+          optimal_rainfall_max?: number
+          optimal_rainfall_min?: number
+          optimal_temp_max?: number
+          optimal_temp_min?: number
+          pest_susceptibility_index?: number
+          water_requirement_per_acre?: number
+          yield_unit?: string
+        }
+        Update: {
+          base_yield_per_acre?: number
+          crop_name?: string
+          id?: string
+          optimal_rainfall_max?: number
+          optimal_rainfall_min?: number
+          optimal_temp_max?: number
+          optimal_temp_min?: number
+          pest_susceptibility_index?: number
+          water_requirement_per_acre?: number
+          yield_unit?: string
+        }
+        Relationships: []
+      }
+      farms: {
+        Row: {
+          country: string
+          created_at: string
+          crop_type: string
+          farm_size: number
+          farm_size_unit: string
+          id: string
+          irrigation_type: string
+          name: string
+          planting_date: string | null
+          region: string
+          soil_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          crop_type?: string
+          farm_size?: number
+          farm_size_unit?: string
+          id?: string
+          irrigation_type?: string
+          name?: string
+          planting_date?: string | null
+          region: string
+          soil_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          crop_type?: string
+          farm_size?: number
+          farm_size_unit?: string
+          id?: string
+          irrigation_type?: string
+          name?: string
+          planting_date?: string | null
+          region?: string
+          soil_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments: number | null
@@ -335,6 +422,95 @@ export type Database = {
           votes?: number | null
         }
         Relationships: []
+      }
+      region_climate: {
+        Row: {
+          country: string
+          drought_risk_index: number
+          flood_risk_index: number
+          historical_rainfall_avg: number
+          historical_temp_avg: number
+          id: string
+          last_updated: string
+          region: string
+          seasonal_projection_rainfall: number | null
+          seasonal_projection_temp: number | null
+        }
+        Insert: {
+          country?: string
+          drought_risk_index?: number
+          flood_risk_index?: number
+          historical_rainfall_avg?: number
+          historical_temp_avg?: number
+          id?: string
+          last_updated?: string
+          region: string
+          seasonal_projection_rainfall?: number | null
+          seasonal_projection_temp?: number | null
+        }
+        Update: {
+          country?: string
+          drought_risk_index?: number
+          flood_risk_index?: number
+          historical_rainfall_avg?: number
+          historical_temp_avg?: number
+          id?: string
+          last_updated?: string
+          region?: string
+          seasonal_projection_rainfall?: number | null
+          seasonal_projection_temp?: number | null
+        }
+        Relationships: []
+      }
+      simulation_results: {
+        Row: {
+          farm_id: string
+          id: string
+          insights: string[]
+          irrigation_recommendation: string
+          last_updated: string
+          pest_risk_pct: number
+          profit_projection: number
+          projected_yield: number
+          risk_score: number
+          water_usage_estimate: number
+          yield_change_pct: number
+        }
+        Insert: {
+          farm_id: string
+          id?: string
+          insights?: string[]
+          irrigation_recommendation?: string
+          last_updated?: string
+          pest_risk_pct?: number
+          profit_projection?: number
+          projected_yield?: number
+          risk_score?: number
+          water_usage_estimate?: number
+          yield_change_pct?: number
+        }
+        Update: {
+          farm_id?: string
+          id?: string
+          insights?: string[]
+          irrigation_recommendation?: string
+          last_updated?: string
+          pest_risk_pct?: number
+          profit_projection?: number
+          projected_yield?: number
+          risk_score?: number
+          water_usage_estimate?: number
+          yield_change_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_results_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
