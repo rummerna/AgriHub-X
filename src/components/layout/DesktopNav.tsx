@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel } from "lucide-react";
+import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel, Sprout } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ const navLinks = [
   { to: "/ask-agri", label: "Ask Agri", icon: HelpCircle },
   { to: "/services", label: "Services", icon: Wrench },
   { to: "/auctions", label: "Auctions", icon: Gavel },
+  { to: "/digital-twin", label: "Farm Twin", icon: Sprout },
 ];
 
 const DesktopNav = () => {
