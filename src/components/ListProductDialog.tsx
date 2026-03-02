@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Camera, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { marketplaceCategories, currencies } from "@/data/mock";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import ImageUpload from "@/components/ImageUpload";
 
 const units = ["kg", "tonnes", "bags", "crates", "pieces", "litres", "bundles", "bales"];
 const grades = ["Grade A (Premium)", "Grade B (Standard)", "Grade C (Economy)", "Ungraded"];
@@ -31,19 +32,24 @@ const ListProductDialog = ({ onProductListed }: Props) => {
   const [currency, setCurrency] = useState("KES");
   const [description, setDescription] = useState("");
   const [hasTransport, setHasTransport] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
   const { toast } = useToast();
   const { isLoggedIn, supabaseUser, user } = useAuth();
 
   const resetForm = () => {
     setTitle(""); setCategory(""); setGrade(""); setQuantity("");
     setUnit("kg"); setMinOrder(""); setPrice(""); setCurrency("KES");
-    setDescription(""); setHasTransport(false);
+    setDescription(""); setHasTransport(false); setImages([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn || !supabaseUser) {
       toast({ title: "Sign in required", description: "Please sign in to list a product.", variant: "destructive" });
+      return;
+    }
+    if (images.length === 0) {
+      toast({ title: "Image required", description: "Please upload at least 1 product photo.", variant: "destructive" });
       return;
     }
 
@@ -62,6 +68,7 @@ const ListProductDialog = ({ onProductListed }: Props) => {
       has_transport: hasTransport,
       country: user?.country || "",
       county: user?.county || "",
+      image_url: images[0],
     });
 
     setLoading(false);
@@ -150,18 +157,22 @@ const ListProductDialog = ({ onProductListed }: Props) => {
             <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your product quality, harvest date, availability..." rows={3} />
           </div>
           <div>
-            <Label>Photos</Label>
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors">
-              <Camera className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Click to upload product photos</p>
-              <p className="text-xs text-muted-foreground mt-1">Max 5 images, 5MB each</p>
-            </div>
+            <Label>Product Photos (Required, min 1)</Label>
+            <ImageUpload
+              bucket="product-images"
+              folder={supabaseUser?.id || "anon"}
+              maxImages={5}
+              images={images}
+              onChange={setImages}
+              showMainBadge
+              required
+            />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="transport" className="rounded" checked={hasTransport} onChange={e => setHasTransport(e.target.checked)} />
             <Label htmlFor="transport" className="text-sm font-normal">I can arrange transport / delivery</Label>
           </div>
-          <Button type="submit" className="w-full" disabled={loading || !title || !category || !price}>
+          <Button type="submit" className="w-full" disabled={loading || !title || !category || !price || images.length === 0}>
             {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Publishing...</> : "Publish Listing"}
           </Button>
         </form>

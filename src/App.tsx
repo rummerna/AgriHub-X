@@ -28,6 +28,7 @@ import Weather from "./pages/Weather";
 import Auctions from "./pages/Auctions";
 import AuctionDetail from "./pages/AuctionDetail";
 import DigitalTwin from "./pages/DigitalTwin";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/auctions" element={<Auctions />} />
             <Route path="/auctions/:id" element={<AuctionDetail />} />
             <Route path="/digital-twin" element={<DigitalTwin />} />
+            <Route path="/messages" element={<Messages />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

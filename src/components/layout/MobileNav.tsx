@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, ShoppingCart, Users, User } from "lucide-react";
+import { Home, Search, ShoppingCart, MessageCircle, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home },
   { to: "/search", label: "Search", icon: Search },
   { to: "/marketplace", label: "Market", icon: ShoppingCart },
-  { to: "/community", label: "Community", icon: Users },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/profile", label: "Profile", icon: User },
 ];
 

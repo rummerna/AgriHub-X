@@ -3,11 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ThumbsUp, MessageCircle, Plus, Loader2, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Plus, Loader2, X, Camera } from "lucide-react";
 import { communityPosts as mockPosts, trendingTopics } from "@/data/mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/ImageUpload";
+import ImageGrid from "@/components/ImageGrid";
 
 interface Post {
   id: string;
@@ -20,6 +22,7 @@ interface Post {
   comments: number;
   time: string;
   isDemo?: boolean;
+  imageUrls: string[];
 }
 
 const Community = () => {
@@ -27,6 +30,7 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
   const [newContent, setNewContent] = useState("");
+  const [newImages, setNewImages] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
   const { isLoggedIn, supabaseUser, user } = useAuth();
   const { toast } = useToast();
@@ -42,7 +46,7 @@ const Community = () => {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, country, county").in("user_id", userIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      setDbPosts(data.map((p) => {
+      setDbPosts(data.map((p: any) => {
         const prof = profileMap.get(p.user_id);
         return {
           id: p.id,
@@ -54,6 +58,7 @@ const Community = () => {
           upvotes: p.likes || 0,
           comments: p.comments || 0,
           time: new Date(p.created_at).toLocaleDateString(),
+          imageUrls: p.image_urls || [],
         };
       }));
     }
@@ -68,11 +73,13 @@ const Community = () => {
     const { error } = await supabase.from("posts").insert({
       user_id: supabaseUser.id,
       content: newContent.trim(),
+      image_urls: newImages.length > 0 ? newImages : [],
     });
     if (error) {
       toast({ title: "Failed to post", description: error.message, variant: "destructive" });
     } else {
       setNewContent("");
+      setNewImages([]);
       setShowNew(false);
       toast({ title: "Post published!" });
       fetchPosts();
@@ -80,8 +87,12 @@ const Community = () => {
     setPosting(false);
   };
 
-  // Merge DB posts with mock (DB first)
-  const allPosts = [...dbPosts, ...mockPosts.filter(mp => !dbPosts.some(dp => dp.content === mp.content))];
+  const allPosts: Post[] = [
+    ...dbPosts,
+    ...mockPosts
+      .filter(mp => !dbPosts.some(dp => dp.content === mp.content))
+      .map(mp => ({ ...mp, imageUrls: [] })),
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -102,12 +113,19 @@ const Community = () => {
             <Textarea
               value={newContent}
               onChange={e => setNewContent(e.target.value)}
-              placeholder="Share something with the community..."
+              placeholder="What's on your farm today?"
               rows={3}
+            />
+            <ImageUpload
+              bucket="post-images"
+              folder={supabaseUser?.id || "anon"}
+              maxImages={5}
+              images={newImages}
+              onChange={setNewImages}
             />
             <div className="flex justify-end">
               <Button onClick={handlePost} disabled={posting || !newContent.trim() || !isLoggedIn}>
-                {posting ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Posting...</> : "Post"}
+                {posting ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Posting...</> : "Post to Community"}
               </Button>
             </div>
           </CardContent>
@@ -115,7 +133,6 @@ const Community = () => {
       )}
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Feed */}
         <div className="md:col-span-2 space-y-4">
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
@@ -138,6 +155,7 @@ const Community = () => {
                     </div>
                   </div>
                   <p className="text-sm mb-3">{post.content}</p>
+                  {post.imageUrls.length > 0 && <ImageGrid images={post.imageUrls} />}
                   {post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {post.tags.map((tag) => (
@@ -159,7 +177,6 @@ const Community = () => {
           )}
         </div>
 
-        {/* Sidebar */}
         <aside className="space-y-4">
           <Card>
             <CardContent className="p-4">

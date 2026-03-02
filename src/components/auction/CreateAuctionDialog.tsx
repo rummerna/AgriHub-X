@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +41,7 @@ const CreateAuctionDialog = ({ open, onClose, onCreated }: Props) => {
     duration: "72",
     description: "",
   });
+  const [images, setImages] = useState<string[]>([]);
 
   const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -86,6 +88,7 @@ const CreateAuctionDialog = ({ open, onClose, onCreated }: Props) => {
       country: user?.country || "",
       county: user?.county || "",
       currency: user?.currency || "KES",
+      image_url: images[0] || null,
     });
 
     setLoading(false);
@@ -97,6 +100,7 @@ const CreateAuctionDialog = ({ open, onClose, onCreated }: Props) => {
 
     toast({ title: "Auction created!", description: "Your auction is now live." });
     setForm({ product_name: "", category: "Crops", quantity: "1", unit: "kg", starting_bid: "", reserve_price: "", duration: "72", description: "" });
+    setImages([]);
     onCreated();
     onClose();
   };
@@ -165,6 +169,18 @@ const CreateAuctionDialog = ({ open, onClose, onCreated }: Props) => {
           <div>
             <Label>Description (optional)</Label>
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe your product..." rows={3} />
+          </div>
+
+          <div>
+            <Label>Auction Photos (Optional)</Label>
+            <ImageUpload
+              bucket="product-images"
+              folder={supabaseUser?.id || "anon"}
+              maxImages={5}
+              images={images}
+              onChange={setImages}
+              showMainBadge
+            />
           </div>
 
           <Button onClick={handleSubmit} disabled={loading} className="w-full gap-2">

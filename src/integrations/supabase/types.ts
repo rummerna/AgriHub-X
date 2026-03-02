@@ -171,6 +171,66 @@ export type Database = {
           },
         ]
       }
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          is_archived_by_1: boolean
+          is_archived_by_2: boolean
+          last_message_at: string | null
+          last_message_text: string | null
+          last_sender_id: string | null
+          participant_1_id: string
+          participant_2_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_archived_by_1?: boolean
+          is_archived_by_2?: boolean
+          last_message_at?: string | null
+          last_message_text?: string | null
+          last_sender_id?: string | null
+          participant_1_id: string
+          participant_2_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_archived_by_1?: boolean
+          is_archived_by_2?: boolean
+          last_message_at?: string | null
+          last_message_text?: string | null
+          last_sender_id?: string | null
+          participant_1_id?: string
+          participant_2_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crop_thresholds: {
         Row: {
           base_yield_per_acre: number
@@ -258,12 +318,64 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          image_urls: string[] | null
+          is_read: boolean
+          message_text: string | null
+          message_type: string
+          reply_to_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          is_read?: boolean
+          message_text?: string | null
+          message_type?: string
+          reply_to_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[] | null
+          is_read?: boolean
+          message_text?: string | null
+          message_type?: string
+          reply_to_id?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           comments: number | null
           content: string
           created_at: string
           id: string
+          image_urls: string[] | null
           likes: number | null
           user_id: string
         }
@@ -272,6 +384,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_urls?: string[] | null
           likes?: number | null
           user_id: string
         }
@@ -280,6 +393,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_urls?: string[] | null
           likes?: number | null
           user_id?: string
         }
@@ -396,6 +510,7 @@ export type Database = {
           body: string | null
           created_at: string
           id: string
+          image_urls: string[] | null
           tags: string[] | null
           title: string
           user_id: string
@@ -406,6 +521,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           id?: string
+          image_urls?: string[] | null
           tags?: string[] | null
           title: string
           user_id: string
@@ -416,6 +532,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           id?: string
+          image_urls?: string[] | null
           tags?: string[] | null
           title?: string
           user_id?: string
