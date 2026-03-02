@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel, Sprout } from "lucide-react";
+import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,6 +52,11 @@ const DesktopNav = () => {
             </Button>
           </Link>
         ))}
+        <Link to="/messages">
+          <Button variant="ghost" size="icon" className="relative">
+            <MessageCircle className="w-5 h-5" />
+          </Button>
+        </Link>
         <Link to="/notifications">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-5 h-5" />

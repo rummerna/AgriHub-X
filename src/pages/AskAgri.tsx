@@ -9,6 +9,8 @@ import { questions as mockQuestions } from "@/data/mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/ImageUpload";
+import ImageGrid from "@/components/ImageGrid";
 
 interface Question {
   id: string;
@@ -20,6 +22,7 @@ interface Question {
   bestAnswer?: string;
   time: string;
   followed: boolean;
+  imageUrls: string[];
 }
 
 const AskAgri = () => {
@@ -29,6 +32,7 @@ const AskAgri = () => {
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
   const [newTags, setNewTags] = useState("");
+  const [newImages, setNewImages] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
   const { isLoggedIn, supabaseUser, user } = useAuth();
   const { toast } = useToast();
@@ -44,7 +48,7 @@ const AskAgri = () => {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
       const nameMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
 
-      setDbQuestions(data.map((q) => ({
+      setDbQuestions(data.map((q: any) => ({
         id: q.id,
         question: q.title,
         author: nameMap.get(q.user_id) || "Unknown",
@@ -53,6 +57,7 @@ const AskAgri = () => {
         answers: q.answers || 0,
         time: new Date(q.created_at).toLocaleDateString(),
         followed: false,
+        imageUrls: q.image_urls || [],
       })));
     }
     setLoading(false);
@@ -69,11 +74,12 @@ const AskAgri = () => {
       title: newTitle.trim(),
       body: newBody.trim() || null,
       tags: tags.length > 0 ? tags : null,
+      image_urls: newImages.length > 0 ? newImages : [],
     });
     if (error) {
       toast({ title: "Failed to post question", description: error.message, variant: "destructive" });
     } else {
-      setNewTitle(""); setNewBody(""); setNewTags("");
+      setNewTitle(""); setNewBody(""); setNewTags(""); setNewImages([]);
       setShowNew(false);
       toast({ title: "Question posted!" });
       fetchQuestions();
@@ -81,7 +87,12 @@ const AskAgri = () => {
     setPosting(false);
   };
 
-  const allQuestions = [...dbQuestions, ...mockQuestions.filter(mq => !dbQuestions.some(dq => dq.question === mq.question))];
+  const allQuestions: Question[] = [
+    ...dbQuestions,
+    ...mockQuestions
+      .filter(mq => !dbQuestions.some(dq => dq.question === mq.question))
+      .map(mq => ({ ...mq, imageUrls: [] })),
+  ];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -102,6 +113,13 @@ const AskAgri = () => {
             <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="What's your question?" />
             <Textarea value={newBody} onChange={e => setNewBody(e.target.value)} placeholder="Add more details (optional)..." rows={3} />
             <Input value={newTags} onChange={e => setNewTags(e.target.value)} placeholder="Tags (comma-separated, e.g. Maize, Pest Control)" />
+            <ImageUpload
+              bucket="question-images"
+              folder={supabaseUser?.id || "anon"}
+              maxImages={3}
+              images={newImages}
+              onChange={setNewImages}
+            />
             <div className="flex justify-end">
               <Button onClick={handleAsk} disabled={posting || !newTitle.trim() || !isLoggedIn}>
                 {posting ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Posting...</> : "Ask Question"}
@@ -136,6 +154,7 @@ const AskAgri = () => {
                         <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
                       ))}
                     </div>
+                    {q.imageUrls.length > 0 && <ImageGrid images={q.imageUrls} maxVisible={3} />}
                     {q.bestAnswer && (
                       <div className="bg-muted rounded-lg p-3 text-sm mb-2">
                         <p className="text-xs font-semibold text-primary mb-1 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Best Answer</p>
