@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ThumbsUp, MessageCircle, Plus, Loader2, X, Camera } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Heart, Lightbulb, MessageCircle, Plus, Loader2, X } from "lucide-react";
 import { communityPosts as mockPosts, trendingTopics } from "@/data/mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -166,6 +166,15 @@ const Community = () => {
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <button className="flex items-center gap-1 hover:text-primary transition-colors">
                       <ThumbsUp className="w-4 h-4" /> {post.upvotes}
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-destructive transition-colors">
+                      <ThumbsDown className="w-4 h-4" />
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-red-500 transition-colors">
+                      <Heart className="w-4 h-4" />
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-yellow-500 transition-colors">
+                      <Lightbulb className="w-4 h-4" />
                     </button>
                     <button className="flex items-center gap-1 hover:text-primary transition-colors">
                       <MessageCircle className="w-4 h-4" /> {post.comments}

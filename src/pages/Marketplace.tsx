@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, Bookmark, MapPin, Search, Loader2, Gavel } from "lucide-react";
+import { MessageCircle, Bookmark, BookmarkCheck, MapPin, Search, Loader2, Gavel, ShoppingCart } from "lucide-react";
 import { products as mockProducts, paymentMethods } from "@/data/mock";
 import ListProductDialog from "@/components/ListProductDialog";
 import ProductDetail from "@/components/ProductDetail";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/hooks/useCart";
+import { useSavedItems } from "@/hooks/useSavedItems";
 
 const mainCategories = ["All", "Crops", "Livestock", "Inputs", "Equipment"];
 
@@ -30,6 +32,8 @@ const Marketplace = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart, itemCount } = useCart();
+  const { savedIds, toggleSave } = useSavedItems();
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -39,7 +43,6 @@ const Marketplace = () => {
       .order("created_at", { ascending: false });
 
     if (data && !error) {
-      // Fetch seller names
       const userIds = [...new Set(data.map(p => p.user_id))];
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
       const nameMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
@@ -64,7 +67,6 @@ const Marketplace = () => {
     fetchProducts();
   }, []);
 
-  // Merge DB products with mock data (DB first)
   const allProducts = [...dbProducts, ...mockProducts.filter(mp => !dbProducts.some(dp => dp.title === mp.title))];
 
   const filtered = allProducts.filter((p) => {
@@ -78,55 +80,43 @@ const Marketplace = () => {
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl md:text-3xl font-display font-bold">Marketplace</h1>
         <div className="flex gap-2">
-          <Link to="/auctions">
-            <Button variant="outline" className="gap-1.5">
-              <Gavel className="w-4 h-4" /> Live Auctions
+          <Link to="/cart">
+            <Button variant="outline" className="gap-1.5 relative">
+              <ShoppingCart className="w-4 h-4" /> Cart
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
+              )}
             </Button>
+          </Link>
+          <Link to="/saved">
+            <Button variant="outline" className="gap-1.5"><Bookmark className="w-4 h-4" /> Saved</Button>
+          </Link>
+          <Link to="/auctions">
+            <Button variant="outline" className="gap-1.5"><Gavel className="w-4 h-4" /> Live Auctions</Button>
           </Link>
           <ListProductDialog onProductListed={fetchProducts} />
         </div>
       </div>
       <p className="text-muted-foreground mb-4 text-sm">Browse crops, livestock, inputs, and equipment</p>
 
-      {/* Search */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="What do you need? Search products, sellers..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <Input placeholder="What do you need? Search products, sellers..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
       </div>
 
-      {/* Categories */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {mainCategories.map((cat) => (
-          <Button
-            key={cat}
-            variant={activeCategory === cat ? "default" : "outline"}
-            size="sm"
-            onClick={() => setActiveCategory(cat)}
-          >
-            {cat}
-          </Button>
+          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(cat)}>{cat}</Button>
         ))}
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        </div>
+        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
       ) : (
         <>
-          {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {filtered.map((p) => (
-              <Card
-                key={p.id}
-                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setSelectedProduct(p)}
-              >
+              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedProduct(p)}>
                 <div className="aspect-[4/3] bg-muted flex items-center justify-center">
                   <img src={p.image} alt={p.title} className="w-16 h-16 opacity-40" />
                 </div>
@@ -136,8 +126,13 @@ const Marketplace = () => {
                   <p className="text-xs text-muted-foreground">{p.seller}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{p.county}, {p.country}</p>
                   <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
+                      <ShoppingCart className="w-3 h-3" /> Add
+                    </Button>
                     <Button size="sm" className="flex-1 gap-1"><MessageCircle className="w-3 h-3" />Message</Button>
-                    <Button size="sm" variant="outline"><Bookmark className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
+                      {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -153,7 +148,6 @@ const Marketplace = () => {
         </>
       )}
 
-      {/* Payment Methods */}
       <Card className="shadow-md">
         <CardContent className="p-6">
           <h2 className="font-display font-semibold text-lg mb-3">Accepted Payment Methods</h2>
