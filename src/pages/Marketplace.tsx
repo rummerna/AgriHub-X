@@ -11,6 +11,7 @@ import ProductDetail from "@/components/ProductDetail";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useSavedItems } from "@/hooks/useSavedItems";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const mainCategories = ["All", "Crops", "Livestock", "Inputs", "Equipment"];
 
@@ -24,6 +25,7 @@ interface Product {
   country: string;
   county: string;
   category: string;
+  sellerId?: string;
 }
 
 const Marketplace = () => {
@@ -34,6 +36,7 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const { addToCart, itemCount } = useCart();
   const { savedIds, toggleSave } = useSavedItems();
+  const { formatPrice } = useCurrency();
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -57,6 +60,7 @@ const Marketplace = () => {
         country: p.country || "",
         county: p.county || "",
         category: p.category,
+        sellerId: p.user_id,
       }));
       setDbProducts(mapped);
     }
@@ -122,14 +126,14 @@ const Marketplace = () => {
                 </div>
                 <CardContent className="p-4 space-y-2">
                   <h3 className="font-semibold text-sm line-clamp-1">{p.title}</h3>
-                  <p className="font-bold text-primary text-lg">{p.currency} {p.price.toLocaleString()}</p>
+                  <p className="font-bold text-primary text-lg">{formatPrice(p.price, p.currency)}</p>
                   <p className="text-xs text-muted-foreground">{p.seller}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{p.county}, {p.country}</p>
                   <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
                     <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
                       <ShoppingCart className="w-3 h-3" /> Add
                     </Button>
-                    <Button size="sm" className="flex-1 gap-1"><MessageCircle className="w-3 h-3" />Message</Button>
+                    <Button size="sm" className="flex-1 gap-1" onClick={() => setSelectedProduct(p)}><MessageCircle className="w-3 h-3" />Message</Button>
                     <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
                       {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
                     </Button>

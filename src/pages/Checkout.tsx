@@ -60,6 +60,33 @@ const Checkout = () => {
       const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
       if (itemsErr) throw itemsErr;
 
+      // Notify sellers and reduce stock
+      const productIds = items.map(i => i.product_id);
+      const { data: productsData } = await supabase
+        .from("products")
+        .select("id, user_id, title, quantity")
+        .in("id", productIds);
+
+      if (productsData) {
+        for (const prod of productsData) {
+          const cartItem = items.find(i => i.product_id === prod.id);
+          const newQty = Math.max(0, (prod.quantity || 1) - (cartItem?.quantity || 1));
+
+          // Reduce product quantity
+          await supabase.from("products").update({ quantity: newQty }).eq("id", prod.id);
+
+          // Notify seller
+          if (prod.user_id !== supabaseUser.id) {
+            await supabase.from("notifications").insert({
+              user_id: prod.user_id,
+              type: "new_order",
+              reference_id: order.id,
+              message: `New order for "${prod.title}" (×${cartItem?.quantity || 1})`,
+            });
+          }
+        }
+      }
+
       await clearCart();
       setOrderId(order.id.slice(0, 8).toUpperCase());
       setOrderComplete(true);

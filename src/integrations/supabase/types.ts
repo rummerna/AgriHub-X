@@ -302,6 +302,30 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_rates: {
+        Row: {
+          code: string
+          name: string
+          rate_to_usd: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          name: string
+          rate_to_usd?: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          name?: string
+          rate_to_usd?: number
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       farms: {
         Row: {
           country: string
@@ -400,6 +424,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          reference_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          reference_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          reference_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       order_items: {
         Row: {
