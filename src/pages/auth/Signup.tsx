@@ -6,14 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Leaf, ArrowLeft, ArrowRight, Check, Phone, Loader2 } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Leaf, ArrowLeft, ArrowRight, Check, Phone, Loader2, Mail } from "lucide-react";
 import { countries, roles, currencies } from "@/data/mock";
 import PasswordStrength, { isPasswordStrong } from "@/components/PasswordStrength";
 import SignupCelebration from "@/components/SignupCelebration";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-const steps = ["Account", "Location", "Role", "Currency"];
+const steps = ["Account", "Verify", "Location", "Role", "Currency"];
 
 const Signup = () => {
   const [step, setStep] = useState(0);
@@ -28,6 +30,8 @@ const Signup = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [resending, setResending] = useState(false);
   const navigate = useNavigate();
   const { signup, updateProfile, setRoles, login } = useAuth();
   const { toast } = useToast();
@@ -42,19 +46,12 @@ const Signup = () => {
     setIsLoading(true);
     try {
       await signup(email, password, { full_name: fullName, phone });
-      // Try auto sign-in (works if auto-confirm is enabled)
-      try {
-        await login(email, password);
-      } catch {
-        // If login fails, email confirmation may be required
-        toast({
-          title: "Check your email",
-          description: "We sent you a confirmation link. Please verify your email, then sign in.",
-        });
-        return;
-      }
       setSignupDone(true);
-      setStep(1);
+      setStep(1); // Go to OTP verification step
+      toast({
+        title: "Check your email",
+        description: "We sent you a 6-digit verification code.",
+      });
     } catch (error: any) {
       toast({
         title: "Signup failed",
@@ -66,12 +63,53 @@ const Signup = () => {
     }
   };
 
+  const handleVerifyOtp = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpValue,
+        type: "signup",
+      });
+      if (error) throw error;
+
+      // Auto sign in after verification
+      try {
+        await login(email, password);
+      } catch {
+        // Session may already be set by verifyOtp
+      }
+      
+      toast({ title: "Email verified!" });
+      setStep(2); // Go to onboarding (Location step)
+    } catch (error: any) {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email });
+      if (error) throw error;
+      toast({ title: "Code resent", description: "Check your email for a new code." });
+    } catch (error: any) {
+      toast({ title: "Failed to resend", description: error.message, variant: "destructive" });
+    }
+    setResending(false);
+  };
+
   const handleFinish = async () => {
     setIsLoading(true);
     try {
       await updateProfile({ country, county, currency, full_name: fullName, phone });
-      // Filter to only valid enum roles
-      const validRoles = selectedRoles.filter(r => 
+      const validRoles = selectedRoles.filter(r =>
         ['farmer', 'buyer', 'supplier', 'transporter', 'vet', 'agronomist'].includes(r.toLowerCase())
       );
       if (validRoles.length > 0) {
@@ -91,16 +129,19 @@ const Signup = () => {
 
   const canNext = () => {
     if (step === 0) return email && fullName && password && isPasswordStrong(password) && !isLoading;
-    if (step === 1) return country && county;
-    if (step === 2) return selectedRoles.length > 0;
-    if (step === 3) return currency;
+    if (step === 1) return otpValue.length === 6;
+    if (step === 2) return country && county;
+    if (step === 3) return selectedRoles.length > 0;
+    if (step === 4) return currency;
     return true;
   };
 
   const handleNext = () => {
     if (step === 0 && !signupDone) {
       handleCreateAccount();
-    } else if (step < 3) {
+    } else if (step === 1) {
+      handleVerifyOtp();
+    } else if (step < 4) {
       setStep(step + 1);
     } else {
       handleFinish();
@@ -144,6 +185,32 @@ const Signup = () => {
           )}
 
           {step === 1 && (
+            <div className="space-y-4 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Mail className="w-8 h-8 text-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                We sent a 6-digit code to <span className="font-semibold text-foreground">{email}</span>
+              </p>
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <Button variant="link" size="sm" onClick={handleResendOtp} disabled={resending} className="text-xs">
+                {resending ? "Resending..." : "Didn't receive it? Resend code"}
+              </Button>
+            </div>
+          )}
+
+          {step === 2 && (
             <div className="space-y-4">
               <div>
                 <Label>Country</Label>
@@ -168,7 +235,7 @@ const Signup = () => {
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">Select your role(s)</p>
               <div className="flex flex-wrap gap-2">
@@ -187,7 +254,7 @@ const Signup = () => {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="space-y-4">
               <Label>Preferred Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
@@ -202,12 +269,16 @@ const Signup = () => {
           )}
 
           <div className="flex gap-2 mt-6">
-            {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)} className="gap-1"><ArrowLeft className="w-4 h-4" /> Back</Button>}
+            {step > 0 && step !== 1 && <Button variant="outline" onClick={() => setStep(step - 1)} className="gap-1"><ArrowLeft className="w-4 h-4" /> Back</Button>}
             <Button className="flex-1 gap-1" disabled={!canNext()} onClick={handleNext}>
               {isLoading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Please wait...</>
-              ) : step < 3 ? (
-                <>{step === 0 && !signupDone ? "Create Account" : "Next"} <ArrowRight className="w-4 h-4" /></>
+              ) : step === 0 && !signupDone ? (
+                <>Create Account <ArrowRight className="w-4 h-4" /></>
+              ) : step === 1 ? (
+                <>Verify Email <Check className="w-4 h-4" /></>
+              ) : step < 4 ? (
+                <>Next <ArrowRight className="w-4 h-4" /></>
               ) : (
                 <>Get Started <Check className="w-4 h-4" /></>
               )}

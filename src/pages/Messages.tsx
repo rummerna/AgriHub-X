@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ interface Message {
 
 const Messages = () => {
   const { supabaseUser, isLoggedIn } = useAuth();
+  const location = useLocation();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -109,6 +111,15 @@ const Messages = () => {
   }, [uid]);
 
   useEffect(() => { fetchConversations(); }, [fetchConversations]);
+
+  // Handle navigation state to open a specific conversation
+  useEffect(() => {
+    const state = location.state as { openConversation?: string } | null;
+    if (state?.openConversation && conversations.length > 0 && !activeConv) {
+      const conv = conversations.find((c) => c.id === state.openConversation);
+      if (conv) openConv(conv);
+    }
+  }, [location.state, conversations]);
 
   // Real-time subscriptions
   useEffect(() => {

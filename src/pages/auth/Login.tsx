@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Leaf, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,22 @@ const Login = () => {
     setIsLoading(true);
     try {
       await login(email, password);
+
+      // Check if onboarding is complete (has country set)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("country")
+          .eq("user_id", user.id)
+          .single();
+
+        if (!profile?.country) {
+          navigate("/auth/signup", { state: { resumeOnboarding: true } });
+          return;
+        }
+      }
+
       navigate("/");
     } catch (error: any) {
       toast({
