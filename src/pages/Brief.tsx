@@ -11,7 +11,9 @@ const severityColors = { high: "bg-destructive text-destructive-foreground", med
 
 const Brief = () => {
   const { user } = useAuth();
-  const weather = aggregateWeather(user?.county || "Machakos");
+  const savedLoc = (() => { try { return JSON.parse(localStorage.getItem("agrihubx_weather_location") || "null"); } catch { return null; } })();
+  const weatherCounty = savedLoc?.county || user?.county || "Machakos";
+  const weather = aggregateWeather(weatherCounty);
   const weatherTip = getWeatherTip(weather);
 
   return (
