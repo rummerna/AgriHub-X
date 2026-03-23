@@ -105,7 +105,7 @@ const Checkout = () => {
         <p className="text-sm text-muted-foreground">You'll receive a notification when the seller confirms.</p>
         <div className="flex gap-2 justify-center">
           <Link to="/marketplace"><Button variant="outline">Continue Shopping</Button></Link>
-          <Link to="/profile"><Button>View Profile</Button></Link>
+          <Link to="/orders"><Button>Track Orders</Button></Link>
         </div>
       </div>
     );
