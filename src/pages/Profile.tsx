@@ -4,11 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package } from "lucide-react";
+import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package, CloudRain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { countries } from "@/data/mock";
 
 const scoreColor = (v: number) => v >= 80 ? "bg-green-500" : v >= 50 ? "bg-yellow-500" : "bg-red-500";
 const scoreLabel = (v: number) => v >= 80 ? "Trustworthy" : v >= 50 ? "Needs improvement" : "At risk";
@@ -201,7 +204,123 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Weather Location Override */}
+      <WeatherLocationCard
+        profileCountry={displayCountry}
+        profileCounty={displayCounty}
+        userId={supabaseUser?.id}
+      />
+
+      {/* Quick Links */}
+      <Card className="shadow-md">
+        <CardContent className="p-4 space-y-2">
+          <Link to="/orders" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+            <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">My Orders</span>
+            </div>
+            <span className="text-xs text-muted-foreground">→</span>
+          </Link>
+          <Link to="/saved" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+            <div className="flex items-center gap-2">
+              <Bookmark className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Saved Items</span>
+            </div>
+            <span className="text-xs text-muted-foreground">→</span>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
+  );
+};
+
+const WeatherLocationCard = ({ profileCountry, profileCounty, userId }: { profileCountry: string; profileCounty: string; userId?: string }) => {
+  const [useCustom, setUseCustom] = useState(false);
+  const [weatherCountry, setWeatherCountry] = useState("");
+  const [weatherCounty, setWeatherCounty] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("agrihubx_weather_location");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setUseCustom(true);
+      setWeatherCountry(parsed.country || "");
+      setWeatherCounty(parsed.county || "");
+    }
+  }, []);
+
+  const selectedCountry = countries.find(c => c.name === weatherCountry);
+
+  const handleSave = () => {
+    if (useCustom && weatherCountry && weatherCounty) {
+      localStorage.setItem("agrihubx_weather_location", JSON.stringify({ country: weatherCountry, county: weatherCounty }));
+    } else {
+      localStorage.removeItem("agrihubx_weather_location");
+      setUseCustom(false);
+    }
+    toast({ title: "Weather location updated" });
+  };
+
+  const handleReset = () => {
+    localStorage.removeItem("agrihubx_weather_location");
+    setUseCustom(false);
+    setWeatherCountry("");
+    setWeatherCounty("");
+    toast({ title: "Using profile location for weather" });
+  };
+
+  return (
+    <Card className="shadow-md">
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <CloudRain className="w-5 h-5 text-primary" />
+          <h2 className="font-display font-semibold text-lg">Weather & Brief Location</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Default: {profileCounty}{profileCounty && profileCountry ? ", " : ""}{profileCountry || "Not set"}
+        </p>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={useCustom ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseCustom(!useCustom)}
+          >
+            {useCustom ? "Custom Location" : "Use Profile Location"}
+          </Button>
+        </div>
+
+        {useCustom && (
+          <div className="space-y-3">
+            <div>
+              <Label className="text-sm">Country</Label>
+              <Select value={weatherCountry} onValueChange={(v) => { setWeatherCountry(v); setWeatherCounty(""); }}>
+                <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
+                <SelectContent>
+                  {countries.map(c => <SelectItem key={c.name} value={c.name}>{c.flag} {c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedCountry && (
+              <div>
+                <Label className="text-sm">County / Region</Label>
+                <Select value={weatherCounty} onValueChange={setWeatherCounty}>
+                  <SelectTrigger><SelectValue placeholder="Select county" /></SelectTrigger>
+                  <SelectContent>{selectedCountry.counties.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSave} disabled={!weatherCountry || !weatherCounty}>Save</Button>
+              <Button size="sm" variant="outline" onClick={handleReset}>Reset to Profile</Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

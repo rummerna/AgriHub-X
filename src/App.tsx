@@ -32,6 +32,7 @@ import Cart from "./pages/Cart";
 import SavedItems from "./pages/SavedItems";
 import Checkout from "./pages/Checkout";
 import Messages from "./pages/Messages";
+import Orders from "./pages/Orders";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<Orders />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
