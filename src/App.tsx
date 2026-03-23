@@ -32,6 +32,7 @@ import Cart from "./pages/Cart";
 import SavedItems from "./pages/SavedItems";
 import Checkout from "./pages/Checkout";
 import Messages from "./pages/Messages";
+import Orders from "./pages/Orders";
 
 const queryClient = new QueryClient();
 
