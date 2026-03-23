@@ -4,11 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package } from "lucide-react";
+import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package, CloudRain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { countries } from "@/data/mock";
 
 const scoreColor = (v: number) => v >= 80 ? "bg-green-500" : v >= 50 ? "bg-yellow-500" : "bg-red-500";
 const scoreLabel = (v: number) => v >= 80 ? "Trustworthy" : v >= 50 ? "Needs improvement" : "At risk";
