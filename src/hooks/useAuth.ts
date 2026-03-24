@@ -40,6 +40,8 @@ export const useAuth = () => {
         county: profileData.county || "",
         roles: rolesData?.map((r) => r.role) || [],
         currency: profileData.currency || "KES",
+        weatherLocationCountry: profileData.weather_location_country || "",
+        weatherLocationCounty: profileData.weather_location_county || "",
       });
     }
   }, []);
