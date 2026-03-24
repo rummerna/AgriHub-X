@@ -23,8 +23,7 @@ const seasonGradients: Record<string, string> = {
 const Index = () => {
   const { isLoggedIn, user } = useAuth();
   const season = useSeason(user?.country);
-  const savedLoc = (() => { try { return JSON.parse(localStorage.getItem("agrihubx_weather_location") || "null"); } catch { return null; } })();
-  const weatherCounty = savedLoc?.county || user?.county || "Machakos";
+  const weatherCounty = user?.weatherLocationCounty || user?.county || "Machakos";
   const weather = aggregateWeather(weatherCounty);
   const weatherTip = getWeatherTip(weather);
 

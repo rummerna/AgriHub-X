@@ -637,6 +637,8 @@ export type Database = {
           phone: string | null
           updated_at: string
           user_id: string
+          weather_location_country: string | null
+          weather_location_county: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -651,6 +653,8 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id: string
+          weather_location_country?: string | null
+          weather_location_county?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -665,6 +669,8 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+          weather_location_country?: string | null
+          weather_location_county?: string | null
         }
         Relationships: []
       }

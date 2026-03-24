@@ -32,6 +32,7 @@ const Signup = () => {
   const [signupDone, setSignupDone] = useState(false);
   const [otpValue, setOtpValue] = useState("");
   const [resending, setResending] = useState(false);
+  const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
   const navigate = useNavigate();
   const { signup, updateProfile, setRoles, login } = useAuth();
   const { toast } = useToast();
@@ -47,9 +48,29 @@ const Signup = () => {
     try {
       await signup(email, password, { full_name: fullName, phone });
       setSignupDone(true);
-      setStep(1); // Go to OTP verification step
+
+      // If phone provided, attempt SMS OTP via Twilio edge function
+      if (phone) {
+        try {
+          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          const { data, error } = await supabase.functions.invoke("send-otp-sms", {
+            body: { phone, otp },
+          });
+          if (data?.success) {
+            setOtpMethod("sms");
+          } else {
+            setOtpMethod("email");
+          }
+        } catch {
+          setOtpMethod("email");
+        }
+      } else {
+        setOtpMethod("email");
+      }
+
+      setStep(1);
       toast({
-        title: "Check your email",
+        title: "Check your " + (phone ? "phone or email" : "email"),
         description: "We sent you a 6-digit verification code.",
       });
     } catch (error: any) {
@@ -187,11 +208,34 @@ const Signup = () => {
           {step === 1 && (
             <div className="space-y-4 text-center">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Mail className="w-8 h-8 text-primary" />
+                {otpMethod === "sms" ? <Phone className="w-8 h-8 text-primary" /> : <Mail className="w-8 h-8 text-primary" />}
               </div>
               <p className="text-sm text-muted-foreground">
-                We sent a 6-digit code to <span className="font-semibold text-foreground">{email}</span>
+                We sent a 6-digit code to{" "}
+                <span className="font-semibold text-foreground">
+                  {otpMethod === "sms" ? phone : email}
+                </span>
               </p>
+              {phone && (
+                <div className="flex justify-center gap-2">
+                  <Button
+                    variant={otpMethod === "sms" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setOtpMethod("sms")}
+                    className="text-xs"
+                  >
+                    <Phone className="w-3 h-3 mr-1" /> SMS
+                  </Button>
+                  <Button
+                    variant={otpMethod === "email" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setOtpMethod("email")}
+                    className="text-xs"
+                  >
+                    <Mail className="w-3 h-3 mr-1" /> Email
+                  </Button>
+                </div>
+              )}
               <div className="flex justify-center">
                 <InputOTP maxLength={6} value={otpValue} onChange={setOtpValue}>
                   <InputOTPGroup>

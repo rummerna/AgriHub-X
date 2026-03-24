@@ -241,34 +241,49 @@ const WeatherLocationCard = ({ profileCountry, profileCounty, userId }: { profil
   const [weatherCounty, setWeatherCounty] = useState("");
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { updateProfile } = useAuth();
 
   useEffect(() => {
-    const saved = localStorage.getItem("agrihubx_weather_location");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setUseCustom(true);
-      setWeatherCountry(parsed.country || "");
-      setWeatherCounty(parsed.county || "");
-    }
-  }, []);
+    if (!userId) return;
+    supabase.from("profiles").select("weather_location_country, weather_location_county").eq("user_id", userId).single().then(({ data }) => {
+      if (data?.weather_location_country) {
+        setUseCustom(true);
+        setWeatherCountry(data.weather_location_country);
+        setWeatherCounty(data.weather_location_county || "");
+      }
+    });
+  }, [userId]);
 
   const selectedCountry = countries.find(c => c.name === weatherCountry);
 
-  const handleSave = () => {
-    if (useCustom && weatherCountry && weatherCounty) {
-      localStorage.setItem("agrihubx_weather_location", JSON.stringify({ country: weatherCountry, county: weatherCounty }));
-    } else {
-      localStorage.removeItem("agrihubx_weather_location");
-      setUseCustom(false);
+  const handleSave = async () => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      if (useCustom && weatherCountry && weatherCounty) {
+        await supabase.from("profiles").update({ weather_location_country: weatherCountry, weather_location_county: weatherCounty }).eq("user_id", userId);
+      } else {
+        await supabase.from("profiles").update({ weather_location_country: null, weather_location_county: null }).eq("user_id", userId);
+        setUseCustom(false);
+      }
+      // Refresh auth profile to propagate changes
+      await updateProfile({});
+      toast({ title: "Weather location updated" });
+    } catch {
+      toast({ title: "Failed to update", variant: "destructive" });
     }
-    toast({ title: "Weather location updated" });
+    setSaving(false);
   };
 
-  const handleReset = () => {
-    localStorage.removeItem("agrihubx_weather_location");
+  const handleReset = async () => {
+    if (!userId) return;
+    setSaving(true);
+    await supabase.from("profiles").update({ weather_location_country: null, weather_location_county: null }).eq("user_id", userId);
+    await updateProfile({});
     setUseCustom(false);
     setWeatherCountry("");
     setWeatherCounty("");
+    setSaving(false);
     toast({ title: "Using profile location for weather" });
   };
 
@@ -314,8 +329,10 @@ const WeatherLocationCard = ({ profileCountry, profileCounty, userId }: { profil
               </div>
             )}
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleSave} disabled={!weatherCountry || !weatherCounty}>Save</Button>
-              <Button size="sm" variant="outline" onClick={handleReset}>Reset to Profile</Button>
+              <Button size="sm" onClick={handleSave} disabled={saving || !weatherCountry || !weatherCounty}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleReset} disabled={saving}>Reset to Profile</Button>
             </div>
           </div>
         )}
