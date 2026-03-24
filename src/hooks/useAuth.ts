@@ -10,6 +10,8 @@ interface AuthProfile {
   county: string;
   roles: string[];
   currency: string;
+  weatherLocationCountry: string;
+  weatherLocationCounty: string;
 }
 
 export const useAuth = () => {
