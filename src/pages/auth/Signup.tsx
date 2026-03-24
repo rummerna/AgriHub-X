@@ -48,9 +48,29 @@ const Signup = () => {
     try {
       await signup(email, password, { full_name: fullName, phone });
       setSignupDone(true);
-      setStep(1); // Go to OTP verification step
+
+      // If phone provided, attempt SMS OTP via Twilio edge function
+      if (phone) {
+        try {
+          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          const { data, error } = await supabase.functions.invoke("send-otp-sms", {
+            body: { phone, otp },
+          });
+          if (data?.success) {
+            setOtpMethod("sms");
+          } else {
+            setOtpMethod("email");
+          }
+        } catch {
+          setOtpMethod("email");
+        }
+      } else {
+        setOtpMethod("email");
+      }
+
+      setStep(1);
       toast({
-        title: "Check your email",
+        title: "Check your " + (phone ? "phone or email" : "email"),
         description: "We sent you a 6-digit verification code.",
       });
     } catch (error: any) {
