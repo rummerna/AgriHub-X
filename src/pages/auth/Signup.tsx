@@ -32,6 +32,7 @@ const Signup = () => {
   const [signupDone, setSignupDone] = useState(false);
   const [otpValue, setOtpValue] = useState("");
   const [resending, setResending] = useState(false);
+  const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
   const navigate = useNavigate();
   const { signup, updateProfile, setRoles, login } = useAuth();
   const { toast } = useToast();
