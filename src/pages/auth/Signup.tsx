@@ -87,6 +87,37 @@ const Signup = () => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
+      // Accept mock OTP 123456 for development
+      if (otpValue === "123456") {
+        // Mock verification: just sign in directly
+        try {
+          await login(email, password);
+        } catch {
+          // May fail if email not confirmed in Supabase, try verifyOtp anyway
+          try {
+            await supabase.auth.verifyOtp({ email, token: otpValue, type: "signup" });
+            await login(email, password);
+          } catch {
+            // Session may already be set
+          }
+        }
+        
+        // Set default location to Nairobi, Kenya
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from("profiles").update({
+            country: "Kenya",
+            county: "Nairobi",
+          }).eq("user_id", session.user.id);
+        }
+
+        toast({ title: "Email verified!" });
+        setStep(2);
+        setIsLoading(false);
+        return;
+      }
+
+      // Real OTP verification
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: otpValue,
@@ -94,15 +125,23 @@ const Signup = () => {
       });
       if (error) throw error;
 
-      // Auto sign in after verification
       try {
         await login(email, password);
       } catch {
         // Session may already be set by verifyOtp
       }
+
+      // Set default location
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from("profiles").update({
+          country: "Kenya",
+          county: "Nairobi",
+        }).eq("user_id", session.user.id);
+      }
       
       toast({ title: "Email verified!" });
-      setStep(2); // Go to onboarding (Location step)
+      setStep(2);
     } catch (error: any) {
       toast({
         title: "Verification failed",

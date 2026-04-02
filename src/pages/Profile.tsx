@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/data/mock";
 
-const scoreColor = (v: number) => v >= 80 ? "bg-green-500" : v >= 50 ? "bg-yellow-500" : "bg-red-500";
-const scoreLabel = (v: number) => v >= 80 ? "Trustworthy" : v >= 50 ? "Needs improvement" : "At risk";
+const scoreColor = (v: number) => v > 70 ? "bg-green-500" : v >= 40 ? "bg-yellow-500" : "bg-red-500";
+const scoreLabel = (v: number) => v > 70 ? "Trustworthy" : v >= 40 ? "Needs improvement" : "At risk";
 
 const Profile = () => {
   const { user, isLoggedIn, supabaseUser, updateProfile } = useAuth();
