@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/data/mock";
 
-const scoreColor = (v: number) => v >= 80 ? "bg-green-500" : v >= 50 ? "bg-yellow-500" : "bg-red-500";
-const scoreLabel = (v: number) => v >= 80 ? "Trustworthy" : v >= 50 ? "Needs improvement" : "At risk";
+const scoreColor = (v: number) => v > 70 ? "bg-green-500" : v >= 40 ? "bg-yellow-500" : "bg-red-500";
+const scoreLabel = (v: number) => v > 70 ? "Trustworthy" : v >= 40 ? "Needs improvement" : "At risk";
 
 const Profile = () => {
   const { user, isLoggedIn, supabaseUser, updateProfile } = useAuth();
@@ -24,7 +24,7 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ listings: 0, posts: 0 });
-  const [scores, setScores] = useState({ marketplace_score: 100, community_score: 100, auction_score: 100, delivery_score: 100 });
+  const [scores, setScores] = useState({ marketplace_score: 50, community_score: 50, auction_score: 50, delivery_score: 50 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 

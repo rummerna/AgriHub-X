@@ -1,110 +1,87 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Shield, Cpu, Globe, Users, Lightbulb, Eye, Heart } from "lucide-react";
-
-const differentiators = [
-{ icon: Shield, label: "No GPS Tracking", desc: "Privacy by design with voluntary location sharing only" },
-{ icon: Cpu, label: "AI-Powered Assistance", desc: "Smart crop advice, pest detection, demand forecasting" },
-{ icon: Globe, label: "International Standards", desc: "Multi-language, multi-currency, global scaling" },
-{ icon: Users, label: "Community-First", desc: "Gamified engagement with reputation rewards" },
-{ icon: Eye, label: "Farmer-Centric Design", desc: "Accessible to non-technical users" },
-{ icon: Heart, label: "Trust-Based", desc: "Verified portfolios and escrow" },
-{ icon: Lightbulb, label: "Environmental Intelligence", desc: "Hyper-local weather, pest maps, climate advisory" }];
-
-
-const values = [
-{ title: "Privacy First", desc: "User data belongs to users" },
-{ title: "Trust Through Transparency", desc: "Verified profiles and secure escrow" },
-{ title: "Community Power", desc: "Farmers helping farmers" },
-{ title: "Innovation for Impact", desc: "AI serving real needs" },
-{ title: "Global Reach, Local Relevance", desc: "Culturally adapted solutions" }];
-
+import { Shield, Rocket, Eye, Target, Code } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
       {/* Hero */}
-      <section className="text-center mb-12">
-        <Badge className="mb-3">Our Story</Badge>
-        <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Born from a Dying Pawpaw Tree</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">When Blessed Muriuki's pawpaw tree began dying, he searched for reliable agricultural information — and found none. That frustration sparked an idea: what if every farmer had access to trusted advice, a fair marketplace, and a supportive community? AgriHubX was born.
- Nixon Magenda is a young innovator who believes big ideas don’t need perfect conditions  just vision, discipline and relentless execution. Working primarily from home,
- he dedicated countless hours to building and refining AgriHubX, constantly learning, testing and improving the platform step by step with a clear focus on excellence and international standards. He is driven by a simple belief: technology should solve real problems for real people. After listening closely to farmers and understanding the challenges they face, Nixon committed himself to creating a platform that is practical, trustworthy, globally scalable and privacy-first. AgriHubX reflects his forward-thinking mindset — building clean, powerful systems that create opportunity, trust and global agricultural connection without compromising user privacy.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      <section className="text-center">
+        <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Building the Future of Agriculture</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          AgriHubX is a platform designed to connect farmers, improve decision-making, and create fair opportunities across the agricultural ecosystem.
         </p>
       </section>
 
-      {/* Founders */}
-      <section className="grid md:grid-cols-2 gap-6 mb-12">
-        <Card className="shadow-md">
-          <CardContent className="p-6 text-center">
-            <div className="w-20 h-20 rounded-full bg-primary mx-auto mb-3 flex items-center justify-center text-3xl font-bold text-primary-foreground">B</div>
-            <h3 className="font-display font-bold text-lg">Blessed Muriuki</h3>
-            <p className="text-sm text-muted-foreground mb-2">Researcher </p>
-            <p className="text-sm text-muted-foreground">Rode his bicycle across Tala to interview 25 farmers, documenting their challenges to shape AgriHubX's features and priorities.</p>
+      {/* What We Do */}
+      <section>
+        <h2 className="text-2xl font-display font-bold mb-3">What is AgriHubX?</h2>
+        <p className="text-muted-foreground">
+          AgriHubX is an evolving agricultural platform focused on solving key challenges faced by farmers, including market access, pricing transparency, and access to reliable information. We are building tools that simplify how farmers connect, trade, and make decisions.
+        </p>
+      </section>
+
+      {/* Our Goal */}
+      <section>
+        <h2 className="text-2xl font-display font-bold mb-3">Our Goal</h2>
+        <p className="text-muted-foreground">
+          Our goal is to create a system where farmers can operate with confidence, access better markets, and make smarter decisions using technology.
+        </p>
+      </section>
+
+      {/* In Development */}
+      <section>
+        <Card>
+          <CardContent className="p-6 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Code className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-display font-bold mb-2">Currently in Development</h2>
+              <p className="text-muted-foreground">
+                AgriHubX is actively being developed, with multiple features being refined to ensure a smooth and reliable experience. We are focused on delivering a platform that is simple, secure, and effective.
+              </p>
+            </div>
           </CardContent>
         </Card>
-        <Card className="shadow-md">
-          <CardContent className="p-6 text-center">
-            <div className="w-20 h-20 rounded-full bg-secondary mx-auto mb-3 flex items-center justify-center text-3xl font-bold text-secondary-foreground">N</div>
-            <h3 className="font-display font-bold text-lg">Nixon Magenda</h3>
-            <p className="text-sm text-muted-foreground mb-2">Developer</p>
-            <p className="text-sm text-muted-foreground">Self-taught programmer who coded the entire platform from scratch — every line written specifically for AgriHubX.</p>
+      </section>
+
+      {/* Privacy */}
+      <section>
+        <Card>
+          <CardContent className="p-6 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-display font-bold mb-2">Privacy First</h2>
+              <p className="text-muted-foreground">
+                We prioritize user privacy and data protection by minimizing data collection and ensuring secure handling of all information.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </section>
 
-      {/* Differentiators */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-display font-bold text-center mb-6">What Makes Us Different</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {differentiators.map(({ icon: Icon, label, desc }) => <Card key={label}>
-              <CardContent className="p-4 flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{label}</h4>
-                  <p className="text-xs text-muted-foreground">{desc}</p>
-                </div>
-              </CardContent>
-            </Card>)}
-        </div>
+      {/* Founder */}
+      <section>
+        <h2 className="text-2xl font-display font-bold mb-3">Founder</h2>
+        <p className="text-muted-foreground">
+          AgriHubX is an independent project currently being developed and refined with a focus on long-term impact and innovation.
+        </p>
       </section>
 
-      {/* Values */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-display font-bold text-center mb-6">Our Values</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {values.map((v) => <div key={v.title} className="p-4 rounded-xl bg-muted">
-              <h4 className="font-semibold text-sm">{v.title}</h4>
-              <p className="text-xs text-muted-foreground">{v.desc}</p>
-            </div>)}
-        </div>
-      </section>
-
-      {/* Supporter */}
+      {/* Coming Soon */}
       <section className="text-center py-6 border-t border-border">
-        <p className="text-sm text-muted-foreground">Proudly supported by <strong>St. John Tala High School</strong></p>
-        <p className="text-xs text-muted-foreground mt-1">© 2026 Nixon Magenda & Blessed Muriuki. All rights reserved.</p>
+        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mx-auto mb-3">
+          <Rocket className="w-5 h-5 text-accent" />
+        </div>
+        <h2 className="text-xl font-display font-bold mb-2">More Coming Soon</h2>
+        <p className="text-sm text-muted-foreground">
+          More updates, features, and information will be added as development progresses.
+        </p>
       </section>
-    </div>);};export default About;
+    </div>
+  );
+};
+
+export default About;

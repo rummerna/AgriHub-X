@@ -2,8 +2,13 @@ import { Outlet } from "react-router-dom";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
 import Footer from "./Footer";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 
 const AppLayout = () => {
+  const { user } = useAuth();
+  useTheme(user?.country || "Kenya");
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <DesktopNav />
