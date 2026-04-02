@@ -24,7 +24,7 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ listings: 0, posts: 0 });
-  const [scores, setScores] = useState({ marketplace_score: 100, community_score: 100, auction_score: 100, delivery_score: 100 });
+  const [scores, setScores] = useState({ marketplace_score: 50, community_score: 50, auction_score: 50, delivery_score: 50 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
