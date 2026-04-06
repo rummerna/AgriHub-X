@@ -40,10 +40,13 @@ const Profile = () => {
   useEffect(() => {
     if (!supabaseUser) return;
     const loadProfile = async () => {
-      const { data } = await supabase.from("profiles").select("bio, avatar_url").eq("user_id", supabaseUser.id).single();
+      const { data } = await supabase.from("profiles").select("bio, avatar_url, rating_avg, rating_count").eq("user_id", supabaseUser.id).single();
       if (data) {
         setBio(data.bio || "");
         setAvatarUrl(data.avatar_url);
+        setRatingAvg(Number(data.rating_avg) || 0);
+        setRatingCount(Number(data.rating_count) || 0);
+      }
       }
       const [{ count: listingCount }, { count: postCount }] = await Promise.all([
         supabase.from("products").select("*", { count: "exact", head: true }).eq("user_id", supabaseUser.id),
