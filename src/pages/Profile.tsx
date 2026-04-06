@@ -171,8 +171,8 @@ const Profile = () => {
             </div>
             <div className="p-3 rounded-lg bg-muted">
               <Star className="w-5 h-5 mx-auto mb-1 text-accent fill-accent" />
-              <p className="text-lg font-bold">—</p>
-              <p className="text-xs text-muted-foreground">Rating</p>
+              <p className="text-lg font-bold">{ratingAvg > 0 ? ratingAvg.toFixed(1) : "—"}</p>
+              <p className="text-xs text-muted-foreground">Rating ({ratingCount})</p>
             </div>
           </div>
         </CardContent>
