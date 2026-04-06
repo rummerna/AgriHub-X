@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package, CloudRain } from "lucide-react";
+import { MapPin, Edit, ShoppingCart, MessageCircle, Star, Camera, CheckCircle, Loader2, Bookmark, Package, CloudRain, Shield } from "lucide-react";
+import ReviewList from "@/components/ReviewList";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,8 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ listings: 0, posts: 0 });
   const [scores, setScores] = useState({ marketplace_score: 50, community_score: 50, auction_score: 50, delivery_score: 50 });
+  const [ratingAvg, setRatingAvg] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -37,10 +40,12 @@ const Profile = () => {
   useEffect(() => {
     if (!supabaseUser) return;
     const loadProfile = async () => {
-      const { data } = await supabase.from("profiles").select("bio, avatar_url").eq("user_id", supabaseUser.id).single();
+      const { data } = await supabase.from("profiles").select("bio, avatar_url, rating_avg, rating_count").eq("user_id", supabaseUser.id).single();
       if (data) {
         setBio(data.bio || "");
         setAvatarUrl(data.avatar_url);
+        setRatingAvg(Number(data.rating_avg) || 0);
+        setRatingCount(Number(data.rating_count) || 0);
       }
       const [{ count: listingCount }, { count: postCount }] = await Promise.all([
         supabase.from("products").select("*", { count: "exact", head: true }).eq("user_id", supabaseUser.id),
@@ -170,8 +175,8 @@ const Profile = () => {
             </div>
             <div className="p-3 rounded-lg bg-muted">
               <Star className="w-5 h-5 mx-auto mb-1 text-accent fill-accent" />
-              <p className="text-lg font-bold">—</p>
-              <p className="text-xs text-muted-foreground">Rating</p>
+              <p className="text-lg font-bold">{ratingAvg > 0 ? ratingAvg.toFixed(1) : "—"}</p>
+              <p className="text-xs text-muted-foreground">Rating ({ratingCount})</p>
             </div>
           </div>
         </CardContent>
@@ -204,6 +209,16 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Reviews */}
+      {supabaseUser && (
+        <Card className="shadow-md">
+          <CardContent className="p-6">
+            <h2 className="font-display font-semibold text-lg mb-4">Reviews</h2>
+            <ReviewList userId={supabaseUser.id} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Weather Location Override */}
       <WeatherLocationCard

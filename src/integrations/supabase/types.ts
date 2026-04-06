@@ -504,6 +504,7 @@ export type Database = {
           delivery_fee: number
           id: string
           payment_method: string | null
+          seller_id: string | null
           status: string
           total_amount: number
           updated_at: string
@@ -515,6 +516,7 @@ export type Database = {
           delivery_fee?: number
           id?: string
           payment_method?: string | null
+          seller_id?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
@@ -526,6 +528,7 @@ export type Database = {
           delivery_fee?: number
           id?: string
           payment_method?: string | null
+          seller_id?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
@@ -635,8 +638,14 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          rating_avg: number | null
+          rating_count: number | null
+          role: string | null
+          trade_count: number | null
           updated_at: string
           user_id: string
+          verification_status: string | null
+          verified: boolean | null
           weather_location_country: string | null
           weather_location_county: string | null
         }
@@ -651,8 +660,14 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          role?: string | null
+          trade_count?: number | null
           updated_at?: string
           user_id: string
+          verification_status?: string | null
+          verified?: boolean | null
           weather_location_country?: string | null
           weather_location_county?: string | null
         }
@@ -667,8 +682,14 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          role?: string | null
+          trade_count?: number | null
           updated_at?: string
           user_id?: string
+          verification_status?: string | null
+          verified?: boolean | null
           weather_location_country?: string | null
           weather_location_county?: string | null
         }
@@ -776,6 +797,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          order_id: string
+          rating: number
+          reviewed_id: string
+          reviewer_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          order_id: string
+          rating: number
+          reviewed_id: string
+          reviewer_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          rating?: number
+          reviewed_id?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_items: {
         Row: {
           created_at: string
@@ -832,6 +891,60 @@ export type Database = {
           related_entity_id?: string | null
           score_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          location: string | null
+          price: number | null
+          price_type: string | null
+          provider_id: string
+          rating_avg: number | null
+          rating_count: number | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          price?: number | null
+          price_type?: string | null
+          provider_id: string
+          rating_avg?: number | null
+          rating_count?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: string | null
+          price?: number | null
+          price_type?: string | null
+          provider_id?: string
+          rating_avg?: number | null
+          rating_count?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
