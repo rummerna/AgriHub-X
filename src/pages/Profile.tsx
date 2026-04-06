@@ -211,6 +211,16 @@ const Profile = () => {
         </CardContent>
       </Card>
 
+      {/* Reviews */}
+      {supabaseUser && (
+        <Card className="shadow-md">
+          <CardContent className="p-6">
+            <h2 className="font-display font-semibold text-lg mb-4">Reviews</h2>
+            <ReviewList userId={supabaseUser.id} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Weather Location Override */}
       <WeatherLocationCard
         profileCountry={displayCountry}
