@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ interface Product {
 }
 
 const Marketplace = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -120,7 +121,7 @@ const Marketplace = () => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {filtered.map((p) => (
-              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedProduct(p)}>
+              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
                 <div className="aspect-[4/3] bg-muted flex items-center justify-center">
                   <img src={p.image} alt={p.title} className="w-16 h-16 opacity-40" />
                 </div>
@@ -133,7 +134,7 @@ const Marketplace = () => {
                     <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
                       <ShoppingCart className="w-3 h-3" /> Add
                     </Button>
-                    <Button size="sm" className="flex-1 gap-1" onClick={() => setSelectedProduct(p)}><MessageCircle className="w-3 h-3" />Message</Button>
+                    <Button size="sm" className="flex-1 gap-1" onClick={() => navigate(`/marketplace/${p.id}`)}><MessageCircle className="w-3 h-3" />Details</Button>
                     <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
                       {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
                     </Button>
