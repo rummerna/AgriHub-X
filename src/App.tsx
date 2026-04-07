@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import Community from "./pages/Community";
 import AskAgri from "./pages/AskAgri";
 import Services from "./pages/Services";
@@ -54,6 +55,7 @@ const App = () => (
           <Route element={<AppLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/:id" element={<ProductDetailPage />} />
             <Route path="/community" element={<Community />} />
             <Route path="/ask-agri" element={<AskAgri />} />
             <Route path="/services" element={<Services />} />
