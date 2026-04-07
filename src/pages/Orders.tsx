@@ -50,36 +50,27 @@ const Orders = () => {
     if (!supabaseUser) return;
     const fetchOrders = async () => {
       // Fetch buyer orders
-      const { data: orders } = await supabase
+      const { data: bOrders } = await supabase
         .from("orders")
         .select("*")
         .eq("user_id", supabaseUser.id)
         .order("created_at", { ascending: false });
 
-      if (orders) {
-        const enriched = await enrichOrders(orders);
+      if (bOrders) {
+        const enriched = await enrichOrders(bOrders);
         setBuyerOrders(enriched);
       }
 
-      // Fetch seller orders (orders containing seller's products)
-      const { data: sellerProducts } = await supabase
-        .from("products")
-        .select("id")
-        .eq("user_id", supabaseUser.id);
+      // Fetch seller orders via seller_id
+      const { data: sOrders } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("seller_id", supabaseUser.id)
+        .order("created_at", { ascending: false });
 
-      if (sellerProducts && sellerProducts.length > 0) {
-        const productIds = sellerProducts.map(p => p.id);
-        const { data: sellerOrderItems } = await supabase
-          .from("order_items")
-          .select("order_id")
-          .in("product_id", productIds);
-
-        if (sellerOrderItems && sellerOrderItems.length > 0) {
-          const orderIds = [...new Set(sellerOrderItems.map(oi => oi.order_id))];
-          // We can't directly query these due to RLS (orders belong to buyer)
-          // For now, seller orders are shown from notifications perspective
-          // This would need a dedicated seller_orders view or RLS policy update
-        }
+      if (sOrders) {
+        const enriched = await enrichOrders(sOrders);
+        setSellerOrders(enriched);
       }
 
       setLoading(false);

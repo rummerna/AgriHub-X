@@ -120,7 +120,7 @@ const Marketplace = () => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {filtered.map((p) => (
-              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedProduct(p)}>
+              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
                 <div className="aspect-[4/3] bg-muted flex items-center justify-center">
                   <img src={p.image} alt={p.title} className="w-16 h-16 opacity-40" />
                 </div>
