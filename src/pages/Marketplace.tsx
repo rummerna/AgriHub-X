@@ -134,7 +134,7 @@ const Marketplace = () => {
                     <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
                       <ShoppingCart className="w-3 h-3" /> Add
                     </Button>
-                    <Button size="sm" className="flex-1 gap-1" onClick={() => setSelectedProduct(p)}><MessageCircle className="w-3 h-3" />Message</Button>
+                    <Button size="sm" className="flex-1 gap-1" onClick={() => navigate(`/marketplace/${p.id}`)}><MessageCircle className="w-3 h-3" />Details</Button>
                     <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
                       {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
                     </Button>
