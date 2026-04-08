@@ -9,7 +9,7 @@ import {
   ThumbsUp, ThumbsDown, CheckCircle, Plus, Eye, Loader2, X,
   Sparkles, AlertTriangle, BookOpen, ArrowRight,
 } from "lucide-react";
-import { questions as mockQuestions } from "@/data/mock";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -167,12 +167,7 @@ const AskAgri = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const allQuestions: Question[] = [
-    ...dbQuestions,
-    ...mockQuestions
-      .filter((mq) => !dbQuestions.some((dq) => dq.question === mq.question))
-      .map((mq) => ({ ...mq, imageUrls: [] })),
-  ];
+  const allQuestions: Question[] = dbQuestions;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
