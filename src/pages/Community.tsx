@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Loader2, X } from "lucide-react";
-import { communityPosts as mockPosts, trendingTopics } from "@/data/mock";
+import { trendingTopics } from "@/data/mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,18 +22,17 @@ interface Post {
   upvotes: number;
   comments: number;
   time: string;
-  isDemo?: boolean;
   imageUrls: string[];
 }
 
 const Community = () => {
-  const [dbPosts, setDbPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newImages, setNewImages] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
-  const { isLoggedIn, supabaseUser, user } = useAuth();
+  const { isLoggedIn, supabaseUser } = useAuth();
   const { toast } = useToast();
 
   const fetchPosts = async () => {
@@ -47,7 +46,7 @@ const Community = () => {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, country, county").in("user_id", userIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      setDbPosts(data.map((p: any) => {
+      setPosts(data.map((p: any) => {
         const prof = profileMap.get(p.user_id);
         return {
           id: p.id,
@@ -88,13 +87,6 @@ const Community = () => {
     setPosting(false);
   };
 
-  const allPosts: Post[] = [
-    ...dbPosts,
-    ...mockPosts
-      .filter(mp => !dbPosts.some(dp => dp.content === mp.content))
-      .map(mp => ({ ...mp, imageUrls: [] })),
-  ];
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -111,19 +103,8 @@ const Community = () => {
       {showNew && (
         <Card className="mb-6">
           <CardContent className="p-4 space-y-3">
-            <Textarea
-              value={newContent}
-              onChange={e => setNewContent(e.target.value)}
-              placeholder="What's on your farm today?"
-              rows={3}
-            />
-            <ImageUpload
-              bucket="post-images"
-              folder={supabaseUser?.id || "anon"}
-              maxImages={5}
-              images={newImages}
-              onChange={setNewImages}
-            />
+            <Textarea value={newContent} onChange={e => setNewContent(e.target.value)} placeholder="What's on your farm today?" rows={3} />
+            <ImageUpload bucket="post-images" folder={supabaseUser?.id || "anon"} maxImages={5} images={newImages} onChange={setNewImages} />
             <div className="flex justify-end">
               <Button onClick={handlePost} disabled={posting || !newContent.trim() || !isLoggedIn}>
                 {posting ? <><Loader2 className="w-4 h-4 animate-spin mr-1" /> Posting...</> : "Post to Community"}
@@ -137,8 +118,13 @@ const Community = () => {
         <div className="md:col-span-2 space-y-4">
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p className="text-lg font-medium">No posts yet</p>
+              <p className="text-sm">Be the first to share something with the community!</p>
+            </div>
           ) : (
-            allPosts.map((post) => (
+            posts.map((post) => (
               <Card key={post.id} className="hover:shadow-md transition-all hover:-translate-y-0.5">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -146,12 +132,7 @@ const Community = () => {
                       {post.author.charAt(0)}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-sm">{post.author}</p>
-                        {post.isDemo && (
-                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">DEMO</Badge>
-                        )}
-                      </div>
+                      <p className="font-semibold text-sm">{post.author}</p>
                       <p className="text-xs text-muted-foreground">{post.county}{post.county && post.country ? ", " : ""}{post.country} · {post.time}</p>
                     </div>
                   </div>
@@ -180,14 +161,6 @@ const Community = () => {
                   <Badge key={t} variant="outline" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">{t}</Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-sm">⚠️ Alerts</h3>
-              <p className="text-xs text-muted-foreground">🌧️ Rain expected in Machakos tomorrow</p>
-              <p className="text-xs text-muted-foreground">🐛 Fall armyworm alert in Kisumu</p>
-              <p className="text-xs text-muted-foreground">☕ Coffee berry disease rising in highlands</p>
             </CardContent>
           </Card>
         </aside>

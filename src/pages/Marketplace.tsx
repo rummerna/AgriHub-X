@@ -5,9 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Bookmark, BookmarkCheck, MapPin, Search, Loader2, Gavel, ShoppingCart } from "lucide-react";
-import { products as mockProducts, paymentMethods } from "@/data/mock";
+import { paymentMethods } from "@/data/mock";
 import ListProductDialog from "@/components/ListProductDialog";
-import ProductDetail from "@/components/ProductDetail";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useSavedItems } from "@/hooks/useSavedItems";
@@ -32,8 +31,7 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart, itemCount } = useCart();
   const { savedIds, toggleSave } = useSavedItems();
@@ -51,7 +49,7 @@ const Marketplace = () => {
       const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
       const nameMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
 
-      const mapped: Product[] = data.map((p) => ({
+      setProducts(data.map((p) => ({
         id: p.id,
         title: p.title,
         price: Number(p.price),
@@ -62,19 +60,14 @@ const Marketplace = () => {
         county: p.county || "",
         category: p.category,
         sellerId: p.user_id,
-      }));
-      setDbProducts(mapped);
+      })));
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
-  const allProducts = [...dbProducts, ...mockProducts.filter(mp => !dbProducts.some(dp => dp.title === mp.title))];
-
-  const filtered = allProducts.filter((p) => {
+  const filtered = products.filter((p) => {
     const matchesCategory = activeCategory === "All" || p.category === activeCategory;
     const matchesSearch = !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.seller.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -117,40 +110,36 @@ const Marketplace = () => {
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <p className="text-lg font-medium">No products found</p>
+          <p className="text-sm">Try a different category or search term, or list the first product!</p>
+        </div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {filtered.map((p) => (
-              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
-                <div className="aspect-[4/3] bg-muted flex items-center justify-center">
-                  <img src={p.image} alt={p.title} className="w-16 h-16 opacity-40" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {filtered.map((p) => (
+            <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
+              <div className="aspect-[4/3] bg-muted flex items-center justify-center">
+                <img src={p.image} alt={p.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; (e.target as HTMLImageElement).className = "w-16 h-16 opacity-40"; }} />
+              </div>
+              <CardContent className="p-4 space-y-2">
+                <h3 className="font-semibold text-sm line-clamp-1">{p.title}</h3>
+                <p className="font-bold text-primary text-lg">{formatPrice(p.price, p.currency)}</p>
+                <p className="text-xs text-muted-foreground">{p.seller}</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{p.county}, {p.country}</p>
+                <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+                  <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
+                    <ShoppingCart className="w-3 h-3" /> Add
+                  </Button>
+                  <Button size="sm" className="flex-1 gap-1" onClick={() => navigate(`/marketplace/${p.id}`)}><MessageCircle className="w-3 h-3" />Details</Button>
+                  <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
+                    {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
+                  </Button>
                 </div>
-                <CardContent className="p-4 space-y-2">
-                  <h3 className="font-semibold text-sm line-clamp-1">{p.title}</h3>
-                  <p className="font-bold text-primary text-lg">{formatPrice(p.price, p.currency)}</p>
-                  <p className="text-xs text-muted-foreground">{p.seller}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{p.county}, {p.country}</p>
-                  <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
-                    <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
-                      <ShoppingCart className="w-3 h-3" /> Add
-                    </Button>
-                    <Button size="sm" className="flex-1 gap-1" onClick={() => navigate(`/marketplace/${p.id}`)}><MessageCircle className="w-3 h-3" />Details</Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>
-                      {savedIds.has(p.id) ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg font-medium">No products found</p>
-              <p className="text-sm">Try a different category or search term</p>
-            </div>
-          )}
-        </>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       <Card className="shadow-md">
@@ -166,8 +155,6 @@ const Marketplace = () => {
           </div>
         </CardContent>
       </Card>
-
-      <ProductDetail product={selectedProduct} open={!!selectedProduct} onClose={() => setSelectedProduct(null)} />
     </div>
   );
 };
