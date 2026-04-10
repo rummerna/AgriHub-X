@@ -34,7 +34,7 @@ const Signup = () => {
   const [resending, setResending] = useState(false);
   const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
   const navigate = useNavigate();
-  const { signup, updateProfile, setRoles, login } = useAuth();
+  const { signup, updateProfile, login } = useAuth();
   const { toast } = useToast();
 
   const selectedCountry = countries.find((c) => c.name === country);
@@ -169,12 +169,7 @@ const Signup = () => {
     setIsLoading(true);
     try {
       await updateProfile({ country, county, currency, full_name: fullName, phone });
-      const validRoles = selectedRoles.filter(r =>
-        ['farmer', 'buyer', 'supplier', 'transporter', 'vet', 'agronomist'].includes(r.toLowerCase())
-      );
-      if (validRoles.length > 0) {
-        await setRoles(validRoles.map(r => r.toLowerCase()));
-      }
+      // Roles are assigned server-side during signup
       setShowCelebration(true);
     } catch (error: any) {
       toast({
