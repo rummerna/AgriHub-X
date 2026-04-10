@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,10 +46,41 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate the user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { question, body, tags, imageUrls, userCounty, userCrops } = await req.json();
 
     if (!question || typeof question !== "string" || question.trim().length === 0) {
       return new Response(JSON.stringify({ error: "Question is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (question.length > 2000) {
+      return new Response(JSON.stringify({ error: "Question too long (max 2000 characters)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -61,11 +93,11 @@ serve(async (req) => {
 
     // Build context-enriched user message
     let userMessage = `Question: ${question}`;
-    if (body) userMessage += `\n\nAdditional details: ${body}`;
-    if (tags?.length) userMessage += `\nTags: ${tags.join(", ")}`;
-    if (userCounty) userMessage += `\nFarmer's location: ${userCounty}`;
-    if (userCrops?.length) userMessage += `\nFarmer's crops: ${userCrops.join(", ")}`;
-    if (imageUrls?.length) {
+    if (body && typeof body === "string") userMessage += `\n\nAdditional details: ${body.slice(0, 2000)}`;
+    if (Array.isArray(tags) && tags.length) userMessage += `\nTags: ${tags.slice(0, 10).join(", ")}`;
+    if (userCounty && typeof userCounty === "string") userMessage += `\nFarmer's location: ${userCounty.slice(0, 100)}`;
+    if (Array.isArray(userCrops) && userCrops.length) userMessage += `\nFarmer's crops: ${userCrops.slice(0, 10).join(", ")}`;
+    if (Array.isArray(imageUrls) && imageUrls.length) {
       userMessage += `\n\nThe farmer has attached ${imageUrls.length} image(s). Please note you are receiving URLs, not the actual images. Mention that you've noted the images and provide advice based on the text description.`;
     }
 
@@ -98,8 +130,7 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errText = await response.text();
-      console.error("AI gateway error:", response.status, errText);
+      console.error("AI gateway error:", response.status);
       throw new Error("AI gateway error");
     }
 
@@ -109,12 +140,10 @@ serve(async (req) => {
     // Try to parse structured JSON from the response
     let parsed;
     try {
-      // Extract JSON from markdown code blocks if present
       const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/```\s*([\s\S]*?)```/);
       const jsonStr = jsonMatch ? jsonMatch[1].trim() : raw.trim();
       parsed = JSON.parse(jsonStr);
     } catch {
-      // Fallback: return raw text as answer
       parsed = {
         answer: raw,
         confidence: 0.7,
@@ -132,7 +161,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("ask-agri-ai error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "An error occurred processing your request." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
