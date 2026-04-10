@@ -116,7 +116,7 @@ export const useAuth = () => {
     login,
     signup,
     updateProfile,
-    setRoles,
+    
     logout,
   };
 };
