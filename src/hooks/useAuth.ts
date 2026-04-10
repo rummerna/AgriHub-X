@@ -98,18 +98,7 @@ export const useAuth = () => {
     await fetchProfile(user.id, user.email);
   }, [user, fetchProfile]);
 
-  const setRoles = useCallback(async (roles: string[]) => {
-    if (!user) return;
-    // Delete existing roles then insert new ones
-    await supabase.from("user_roles").delete().eq("user_id", user.id);
-    if (roles.length > 0) {
-      const { error } = await supabase.from("user_roles").insert(
-        roles.map((role) => ({ user_id: user.id, role: role as any }))
-      );
-      if (error) throw error;
-    }
-    await fetchProfile(user.id, user.email);
-  }, [user, fetchProfile]);
+  // Role assignment is managed server-side only for security
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
