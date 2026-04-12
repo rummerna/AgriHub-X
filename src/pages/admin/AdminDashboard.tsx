@@ -70,7 +70,7 @@ const AdminDashboard = () => {
       supabase.from("products").select("*", { count: "exact", head: true }),
       supabase.from("orders").select("*", { count: "exact", head: true }),
       supabase.from("services").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200),  // Admin needs full profile data
       supabase.from("products").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100),
     ]);

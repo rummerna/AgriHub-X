@@ -1045,7 +1045,69 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          country: string | null
+          county: string | null
+          created_at: string | null
+          currency: string | null
+          full_name: string | null
+          id: string | null
+          rating_avg: number | null
+          rating_count: number | null
+          role: string | null
+          trade_count: number | null
+          updated_at: string | null
+          user_id: string | null
+          verification_status: string | null
+          verified: boolean | null
+          weather_location_country: string | null
+          weather_location_county: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          currency?: string | null
+          full_name?: string | null
+          id?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          role?: string | null
+          trade_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+          verified?: boolean | null
+          weather_location_country?: string | null
+          weather_location_county?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          currency?: string | null
+          full_name?: string | null
+          id?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          role?: string | null
+          trade_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+          verified?: boolean | null
+          weather_location_country?: string | null
+          weather_location_county?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

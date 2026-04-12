@@ -43,7 +43,7 @@ const Community = () => {
 
     if (data) {
       const userIds = [...new Set(data.map(p => p.user_id))];
-      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, country, county").in("user_id", userIds);
+      const { data: profiles } = await supabase.from("profiles_public" as any as 'profiles').select("user_id, full_name, country, county").in("user_id", userIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
       setPosts(data.map((p: any) => {

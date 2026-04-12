@@ -21,7 +21,7 @@ const ServiceDetail = () => {
       const { data } = await supabase.from("services").select("*").eq("id", id).single();
       if (data) {
         setService(data);
-        const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", data.provider_id).single();
+        const { data: profile } = await supabase.from("profiles_public" as any as 'profiles').select("*").eq("user_id", data.provider_id).single();
         setProvider(profile);
       }
       setLoading(false);
