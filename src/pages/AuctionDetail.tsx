@@ -42,7 +42,7 @@ const AuctionDetail = () => {
     if (data) {
       setAuction(data);
       // Get seller name
-      const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", data.seller_id).single();
+      const { data: profile } = await supabase.from("profiles_public").select("full_name").eq("user_id", data.seller_id).single();
       if (profile) setSellerName(profile.full_name);
     }
     setLoading(false);
@@ -57,7 +57,7 @@ const AuctionDetail = () => {
       .order("created_at", { ascending: false });
     if (data) {
       const userIds = [...new Set(data.map((b: any) => b.bidder_id))];
-      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
+      const { data: profiles } = await supabase.from("profiles_public").select("user_id, full_name").in("user_id", userIds);
       const nameMap = new Map(profiles?.map((p: any) => [p.user_id, p.full_name]) || []);
       setBids(data.map((b: any) => ({ ...b, bidder_name: nameMap.get(b.bidder_id) || "Anonymous" })));
     }

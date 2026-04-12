@@ -69,8 +69,15 @@ const ImageUpload = ({
           toast({ title: "Upload failed", description: error.message, variant: "destructive" });
           continue;
         }
-        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
-        newUrls.push(urlData.publicUrl);
+        // Private buckets need signed URLs; public buckets use public URLs
+        const privateBuckets = ["chat-images"];
+        if (privateBuckets.includes(bucket)) {
+          const { data: signedData } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365);
+          if (signedData?.signedUrl) newUrls.push(signedData.signedUrl);
+        } else {
+          const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+          newUrls.push(urlData.publicUrl);
+        }
       }
       onChange([...images, ...newUrls]);
       setUploading(false);
