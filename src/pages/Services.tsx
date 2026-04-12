@@ -47,7 +47,7 @@ const Services = () => {
       if (data && data.length > 0) {
         const providerIds = [...new Set(data.map(s => s.provider_id))];
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, full_name, verified")
           .in("user_id", providerIds);
         const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
