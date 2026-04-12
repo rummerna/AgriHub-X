@@ -74,7 +74,7 @@ const AskAgri = () => {
     if (data) {
       const userIds = [...new Set(data.map((q) => q.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles_public" as any)
+        .from("profiles_public" as any as 'profiles')
         .select("user_id, full_name")
         .in("user_id", userIds);
       const nameMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);

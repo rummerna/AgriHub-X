@@ -29,7 +29,7 @@ export const useSavedItems = () => {
 
     if (data) {
       const sellerIds = [...new Set(data.map((d: any) => d.products?.user_id).filter(Boolean))];
-      const { data: profiles } = await supabase.from("profiles_public" as any).select("user_id, full_name").in("user_id", sellerIds);
+      const { data: profiles } = await supabase.from("profiles_public" as any as 'profiles').select("user_id, full_name").in("user_id", sellerIds);
       const nameMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
 
       setItems(data.map((d: any) => ({
