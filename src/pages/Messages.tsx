@@ -72,7 +72,7 @@ const Messages = () => {
     if (!data) { setLoading(false); return; }
 
     const otherIds = data.map((c: any) => c.participant_1_id === uid ? c.participant_2_id : c.participant_1_id);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", otherIds);
+    const { data: profiles } = await supabase.from("profiles_public" as any).select("user_id, full_name, avatar_url").in("user_id", otherIds);
     const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
     // Count unread
