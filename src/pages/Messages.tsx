@@ -217,7 +217,7 @@ const Messages = () => {
     setNewSearch(q);
     if (q.length < 2) { setSearchResults([]); return; }
     const { data } = await supabase
-      .from("profiles")
+      .from("profiles_public" as any)
       .select("user_id, full_name, avatar_url")
       .ilike("full_name", `%${q}%`)
       .neq("user_id", uid!)
