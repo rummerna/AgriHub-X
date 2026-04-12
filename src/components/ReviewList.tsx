@@ -31,7 +31,7 @@ const ReviewList = ({ userId }: ReviewListProps) => {
       if (data && data.length > 0) {
         const reviewerIds = [...new Set(data.map(r => r.reviewer_id))];
         const { data: profiles } = await supabase
-          .from("profiles_public" as any as 'profiles')
+          .from("profiles")
           .select("user_id, full_name")
           .in("user_id", reviewerIds);
 

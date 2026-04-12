@@ -34,7 +34,7 @@ const ProductDetailPage = () => {
       if (!p) { setLoading(false); return; }
       setProduct(p);
 
-      const { data: profile } = await supabase.from("profiles_public" as any as 'profiles').select("*").eq("user_id", p.user_id).single();
+      const { data: profile } = await supabase.from("profiles").select("user_id, full_name, avatar_url, bio, country, county, role, verified, verification_status, rating_avg, rating_count, trade_count, currency").eq("user_id", p.user_id).single();
       setSeller(profile);
 
       const { data: related } = await supabase.from("products")
