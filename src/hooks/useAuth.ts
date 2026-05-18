@@ -90,13 +90,22 @@ export const useAuth = () => {
 
   const updateProfile = useCallback(async (data: { country?: string; county?: string; currency?: string; bio?: string; full_name?: string; phone?: string }) => {
     if (!user) return;
-    const { error } = await supabase
-      .from("profiles")
-      .update(data)
-      .eq("user_id", user.id);
-    if (error) throw error;
-    await fetchProfile(user.id, user.email);
-  }, [user, fetchProfile]);
+    const { phone, ...profileFields } = data;
+    if (Object.keys(profileFields).length > 0) {
+      const { error } = await supabase
+        .from("profiles")
+        .update(profileFields)
+        .eq("user_id", supabaseUser!.id);
+      if (error) throw error;
+    }
+    if (phone !== undefined) {
+      const { error } = await supabase
+        .from("profile_contacts")
+        .upsert({ user_id: supabaseUser!.id, phone }, { onConflict: "user_id" });
+      if (error) throw error;
+    }
+    await fetchProfile(supabaseUser!.id, supabaseUser!.email);
+  }, [user, supabaseUser, fetchProfile]);
 
   // Role assignment is managed server-side only for security
 
