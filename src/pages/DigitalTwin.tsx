@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Seo from "@/components/Seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ const DigitalTwin = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <Seo title="Digital Farm Twin — Yield Simulation & AI Advisor | AgriHubX" description="Simulate crop yields, plan rotations and chat with a county-level AI farming advisor on your digital farm twin." path="/digital-twin" />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>

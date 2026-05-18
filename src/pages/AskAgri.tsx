@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Seo from "@/components/Seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -171,6 +172,7 @@ const AskAgri = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
+      <Seo title="Ask Agri — AI Farming Assistant | AgriHubX" description="Ask farming questions and get instant AI-powered answers with expert escalation. Crops, livestock, pests, and more." path="/ask-agri" />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">Ask Agri</h1>

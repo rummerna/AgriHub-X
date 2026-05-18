@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Seo from "@/components/Seo";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -75,6 +76,7 @@ const Marketplace = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <Seo title="Marketplace — Buy & Sell Crops, Livestock & Inputs | AgriHubX" description="Browse and list crops, livestock, fertilizers and equipment on the AgriHubX marketplace. Trusted sellers, fair pricing." path="/marketplace" />
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl md:text-3xl font-display font-bold">Marketplace</h1>
         <div className="flex gap-2">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Seo from "@/components/Seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +90,7 @@ const Community = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <Seo title="Agri Community — Farmer Forum & Discussions | AgriHubX" description="Join Kenyan farmers, share tips, ask questions and get advice. Connect with your county community on AgriHubX." path="/community" />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">Agri Community</h1>

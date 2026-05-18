@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import Seo from "@/components/Seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const Weather = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      <Seo title="Weather Forecast for Kenyan Counties | AgriHubX" description="8-source consensus weather forecast for Kenyan counties. Rain, temperature, humidity and farming alerts." path="/weather" />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
