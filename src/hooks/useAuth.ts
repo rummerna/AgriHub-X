@@ -34,7 +34,7 @@ export const useAuth = () => {
     if (profileData) {
       setProfile({
         name: profileData.full_name || email?.split("@")[0] || "User",
-        email: profileData.email || email || "",
+        email: email || "",
         initial: (profileData.full_name?.charAt(0) || email?.charAt(0) || "U").toUpperCase(),
         country: profileData.country || "",
         county: profileData.county || "",
