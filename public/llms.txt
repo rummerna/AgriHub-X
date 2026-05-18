@@ -1,0 +1,28 @@
+# AgriHubX
+
+> Digital farming ecosystem connecting farmers, buyers and agri-experts across Kenya and beyond. Trade crops & livestock, get weather insights, and grow smarter — all without GPS tracking.
+
+AgriHubX is a privacy-first agricultural platform. It combines a marketplace, community, auctions, weather intelligence, an AI farming assistant (Ask Agri), and a digital farm twin for yield simulation. Built by students at St. John Tala High School.
+
+## Pages
+
+- [Home](/): Overview of AgriHubX features and today's farm brief.
+- [Marketplace](/marketplace): Browse and sell crops, livestock, fertilizers and equipment.
+- [Community](/community): Connect with farmers, share posts and get answers.
+- [Ask Agri](/ask-agri): AI-powered farming Q&A with expert escalation.
+- [Services](/services): Find vets, transport, and equipment rentals.
+- [Auctions](/auctions): Live livestock and produce auctions.
+- [Digital Twin](/digital-twin): Simulate yields and get county-level AI advice.
+- [Daily Brief](/brief): Role-specific daily farm insights.
+- [Weather](/weather): Multi-source weather forecast for Kenyan counties.
+- [Blog](/blog): Farmer stories, founder journey, and agricultural tips.
+- [About](/about): Our mission and story.
+- [Careers](/careers): Open roles and student internships.
+- [Contact](/contact): Get in touch.
+
+## Optional
+
+- [Privacy](/privacy): Our no-GPS, no-tracking commitment.
+- [Terms](/terms): Terms of service.
+- [Support](/support): Help center.
+- [Press](/press): Press resources.
