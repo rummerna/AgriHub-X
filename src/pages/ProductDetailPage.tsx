@@ -13,6 +13,7 @@ import { useCart } from "@/hooks/useCart";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useCurrency } from "@/hooks/useCurrency";
 import ReviewList from "@/components/ReviewList";
+import Seo from "@/components/Seo";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -85,8 +86,31 @@ const ProductDetailPage = () => {
   const isSaved = savedIds.has(product.id);
   const isOwnProduct = supabaseUser?.id === product.user_id;
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.description || product.title,
+    image: product.image_url || undefined,
+    category: product.category,
+    offers: {
+      "@type": "Offer",
+      price: Number(product.price),
+      priceCurrency: product.currency || "KES",
+      availability: product.quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: `https://agrihubx.lovable.app/marketplace/${product.id}`,
+    },
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
+      <Seo
+        title={`${product.title} — AgriHubX Marketplace`}
+        description={(product.description || `Buy ${product.title} on AgriHubX. ${product.currency || "KES"} ${Number(product.price).toLocaleString()} per ${product.unit || "kg"}.`).slice(0, 160)}
+        path={`/marketplace/${product.id}`}
+        ogType="product"
+        jsonLd={productJsonLd}
+      />
       <Link to="/marketplace"><Button variant="ghost" size="sm" className="gap-1"><ArrowLeft className="w-4 h-4" /> Marketplace</Button></Link>
 
       <div className="grid md:grid-cols-2 gap-6">
