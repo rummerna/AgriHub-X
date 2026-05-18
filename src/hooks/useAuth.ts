@@ -105,7 +105,7 @@ export const useAuth = () => {
       if (error) throw error;
     }
     await fetchProfile(user!.id, user!.email);
-  }, [user, supabaseUser, fetchProfile]);
+  }, [user, fetchProfile]);
 
   // Role assignment is managed server-side only for security
 
