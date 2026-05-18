@@ -1,5 +1,7 @@
+import Seo from "@/components/Seo";
 const Terms = () => (
   <div className="max-w-3xl mx-auto px-4 py-8">
+    <Seo title="Terms of Service — AgriHubX" description="The terms governing your use of the AgriHubX platform." path="/terms" />
     <h1 className="text-3xl font-display font-bold mb-2">Terms of Service</h1>
     <p className="text-sm text-muted-foreground mb-8">Last updated: February 2026</p>
 

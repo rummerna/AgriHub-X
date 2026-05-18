@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Seo from "@/components/Seo";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,7 @@ const Services = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <Seo title="Agri Services — Vets, Transport, Equipment Rentals | AgriHubX" description="Find verified vets, transporters, equipment rentals and agronomists near you. Hire trusted farm service providers." path="/services" />
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl md:text-3xl font-display font-bold">Agri Services</h1>
         {isLoggedIn && (

@@ -1,7 +1,9 @@
 import { Shield } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const Privacy = () => (
   <div className="max-w-3xl mx-auto px-4 py-8">
+    <Seo title="Privacy Policy — No GPS, No Tracking | AgriHubX" description="How AgriHubX protects your data. No GPS tracking, EXIF stripping, and strict role-based access." path="/privacy" />
     <div className="flex items-center gap-2 mb-2"><Shield className="w-6 h-6 text-primary" /><h1 className="text-3xl font-display font-bold">Privacy Policy</h1></div>
     <p className="text-sm text-muted-foreground mb-8">Last updated: February 2026</p>
 

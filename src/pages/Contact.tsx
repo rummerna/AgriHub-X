@@ -5,10 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, MapPin, Clock, Instagram } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const Contact = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <Seo title="Contact AgriHubX — Get in Touch" description="Reach the AgriHubX team. Send us a message and we will respond within 24 hours." path="/contact" />
       <h1 className="text-3xl font-display font-bold text-center mb-2">Get in Touch</h1>
       <p className="text-center text-muted-foreground mb-8">We'd love to hear from you</p>
 

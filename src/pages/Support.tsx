@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import Seo from "@/components/Seo";
 import { Input } from "@/components/ui/input";
 import { Search, BookOpen, User, ShoppingCart, Users, Cpu, Shield, Mail, MapPin } from "lucide-react";
 
@@ -20,6 +21,7 @@ const popularArticles = [
 
 const Support = () => (
   <div className="max-w-4xl mx-auto px-4 py-8">
+    <Seo title="Help Center & Support — AgriHubX" description="Browse help articles, FAQs and contact support for AgriHubX." path="/support" />
     <h1 className="text-3xl font-display font-bold text-center mb-2">How Can We Help?</h1>
     <p className="text-center text-muted-foreground mb-6">Search our help articles or browse by category</p>
 

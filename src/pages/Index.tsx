@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ const Index = () => {
     // Authenticated Dashboard
     return (
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <Seo title="Your Farm Dashboard — AgriHubX" description="Your personalized farm overview: today's brief, weather, marketplace activity, and community updates." path="/" />
         {/* Welcome */}
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">
@@ -191,6 +193,7 @@ const Index = () => {
   // Unauthenticated Landing Page
   return (
     <div className="max-w-6xl mx-auto px-4">
+      <Seo title="AgriHubX — Digital Farming Ecosystem & Marketplace" description="Connect with farmers, trade crops & livestock, get weather insights and AI farming advice. A privacy-first agri platform — no GPS tracking." path="/" />
       {/* Hero */}
       <section className="py-12 md:py-20 text-center">
         <h1 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">

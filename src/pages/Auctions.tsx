@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Seo from "@/components/Seo";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -120,6 +121,7 @@ const Auctions = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <Seo title="Live Auctions — Bid on Livestock & Produce | AgriHubX" description="Live agricultural auctions for livestock and produce. Real-time bidding with anti-sniping protection." path="/auctions" />
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
           <Gavel className="w-6 h-6 text-primary" />
