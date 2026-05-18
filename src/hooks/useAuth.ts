@@ -95,16 +95,16 @@ export const useAuth = () => {
       const { error } = await supabase
         .from("profiles")
         .update(profileFields)
-        .eq("user_id", supabaseUser!.id);
+        .eq("user_id", user!.id);
       if (error) throw error;
     }
     if (phone !== undefined) {
       const { error } = await supabase
         .from("profile_contacts")
-        .upsert({ user_id: supabaseUser!.id, phone }, { onConflict: "user_id" });
+        .upsert({ user_id: user!.id, phone }, { onConflict: "user_id" });
       if (error) throw error;
     }
-    await fetchProfile(supabaseUser!.id, supabaseUser!.email);
+    await fetchProfile(user!.id, user!.email);
   }, [user, supabaseUser, fetchProfile]);
 
   // Role assignment is managed server-side only for security
