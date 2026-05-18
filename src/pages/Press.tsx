@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import Seo from "@/components/Seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, Mail } from "lucide-react";
@@ -11,6 +12,7 @@ const coverage = [
 
 const Press = () => (
   <div className="max-w-4xl mx-auto px-4 py-8">
+    <Seo title="Press & Media Resources — AgriHubX" description="Press releases, media kit, and brand assets for journalists covering AgriHubX." path="/press" />
     <h1 className="text-3xl font-display font-bold text-center mb-2">AgriHubX in the News</h1>
     <p className="text-center text-muted-foreground mb-8">Press releases, media coverage, and press kit</p>
 

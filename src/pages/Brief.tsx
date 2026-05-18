@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Seo from "@/components/Seo";
 import { Badge } from "@/components/ui/badge";
 import { CloudRain, TrendingUp, TrendingDown, Bug, Lightbulb, Users, AlertTriangle } from "lucide-react";
 import { dailyBriefData } from "@/data/mock";
@@ -37,6 +38,7 @@ const Brief = () => {
             <div className="grid grid-cols-7 gap-1 text-center text-xs">
               {weather.daily.map((d) => (
                 <div key={d.day} className="space-y-1">
+                  <Seo title="Daily Farm Brief — Today's Insights | AgriHubX" description="Role-specific daily insights: weather, market prices, pest alerts and farming tips for your county." path="/brief" />
                   <p className="font-medium text-muted-foreground">{d.day}</p>
                   <p className="text-lg">{d.icon}</p>
                   <p className="font-medium">{d.high}°/{d.low}°</p>

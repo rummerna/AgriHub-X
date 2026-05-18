@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import Seo from "@/components/Seo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
@@ -13,6 +14,7 @@ const openings = [
 
 const Careers = () => (
   <div className="max-w-4xl mx-auto px-4 py-8">
+    <Seo title="Careers & Internships at AgriHubX" description="Join our student-led startup. Open roles, internships, and volunteer opportunities at AgriHubX." path="/careers" />
     <section className="text-center mb-10">
       <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">Grow With Us 🌱</h1>
       <p className="text-muted-foreground max-w-xl mx-auto">Join a student-led startup that's transforming agriculture. Gain hands-on experience, make real impact, and grow your skills.</p>
