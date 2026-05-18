@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const posts = [
   { id: "1", title: "The Pawpaw Tree That Started It All: Blessed's Story", category: "Founder's Journey", excerpt: "When Blessed's pawpaw tree began dying, he searched everywhere for help. What he found instead was a problem affecting millions of farmers…", date: "Feb 15, 2026" },
