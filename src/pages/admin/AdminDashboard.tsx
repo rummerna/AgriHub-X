@@ -27,7 +27,7 @@ interface AdminStats {
 interface UserRow {
   user_id: string;
   full_name: string;
-  email: string | null;
+  email?: string | null;
   country: string | null;
   county: string | null;
   role: string | null;

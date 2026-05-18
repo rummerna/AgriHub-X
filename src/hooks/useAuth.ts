@@ -34,7 +34,7 @@ export const useAuth = () => {
     if (profileData) {
       setProfile({
         name: profileData.full_name || email?.split("@")[0] || "User",
-        email: profileData.email || email || "",
+        email: email || "",
         initial: (profileData.full_name?.charAt(0) || email?.charAt(0) || "U").toUpperCase(),
         country: profileData.country || "",
         county: profileData.county || "",
@@ -90,12 +90,21 @@ export const useAuth = () => {
 
   const updateProfile = useCallback(async (data: { country?: string; county?: string; currency?: string; bio?: string; full_name?: string; phone?: string }) => {
     if (!user) return;
-    const { error } = await supabase
-      .from("profiles")
-      .update(data)
-      .eq("user_id", user.id);
-    if (error) throw error;
-    await fetchProfile(user.id, user.email);
+    const { phone, ...profileFields } = data;
+    if (Object.keys(profileFields).length > 0) {
+      const { error } = await supabase
+        .from("profiles")
+        .update(profileFields)
+        .eq("user_id", user!.id);
+      if (error) throw error;
+    }
+    if (phone !== undefined) {
+      const { error } = await supabase
+        .from("profile_contacts")
+        .upsert({ user_id: user!.id, phone }, { onConflict: "user_id" });
+      if (error) throw error;
+    }
+    await fetchProfile(user!.id, user!.email);
   }, [user, fetchProfile]);
 
   // Role assignment is managed server-side only for security
