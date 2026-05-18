@@ -12,8 +12,24 @@ const posts = [
   { id: "4", title: "How Privacy Became Our Priority: Lessons from Farmers", category: "Agricultural Tips", excerpt: "25 farmers told us the same thing: they were uncomfortable with apps tracking their location. So we built AgriHubX without GPS…", date: "Jan 28, 2026" },
 ];
 
+const blogJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: "AgriHubX Blog",
+  url: "https://agrihubx.lovable.app/blog",
+  blogPost: posts.map(p => ({
+    "@type": "BlogPosting",
+    headline: p.title,
+    datePublished: p.date,
+    articleSection: p.category,
+    description: p.excerpt,
+    author: { "@type": "Organization", name: "AgriHubX" },
+  })),
+};
+
 const Blog = () => (
   <div className="max-w-4xl mx-auto px-4 py-8">
+    <Seo title="AgriHubX Blog — Farmer Stories & Agricultural Tips" description="Stories from the field, founder journeys, and insights for farmers from the AgriHubX team." path="/blog" ogType="article" jsonLd={blogJsonLd} />
     <h1 className="text-3xl font-display font-bold text-center mb-2">Blog</h1>
     <p className="text-center text-muted-foreground mb-6">Stories from the field, insights for farmers</p>
 
