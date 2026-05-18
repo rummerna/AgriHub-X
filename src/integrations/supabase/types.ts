@@ -626,6 +626,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_contacts: {
+        Row: {
+          email: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -634,10 +655,8 @@ export type Database = {
           county: string | null
           created_at: string
           currency: string | null
-          email: string | null
           full_name: string
           id: string
-          phone: string | null
           rating_avg: number | null
           rating_count: number | null
           role: string | null
@@ -656,10 +675,8 @@ export type Database = {
           county?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string
           id?: string
-          phone?: string | null
           rating_avg?: number | null
           rating_count?: number | null
           role?: string | null
@@ -678,10 +695,8 @@ export type Database = {
           county?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string
           id?: string
-          phone?: string | null
           rating_avg?: number | null
           rating_count?: number | null
           role?: string | null
@@ -1051,60 +1066,42 @@ export type Database = {
           bio: string | null
           country: string | null
           county: string | null
-          created_at: string | null
-          currency: string | null
           full_name: string | null
-          id: string | null
           rating_avg: number | null
           rating_count: number | null
           role: string | null
           trade_count: number | null
-          updated_at: string | null
           user_id: string | null
           verification_status: string | null
           verified: boolean | null
-          weather_location_country: string | null
-          weather_location_county: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           country?: string | null
           county?: string | null
-          created_at?: string | null
-          currency?: string | null
           full_name?: string | null
-          id?: string | null
           rating_avg?: number | null
           rating_count?: number | null
           role?: string | null
           trade_count?: number | null
-          updated_at?: string | null
           user_id?: string | null
           verification_status?: string | null
           verified?: boolean | null
-          weather_location_country?: string | null
-          weather_location_county?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           country?: string | null
           county?: string | null
-          created_at?: string | null
-          currency?: string | null
           full_name?: string | null
-          id?: string | null
           rating_avg?: number | null
           rating_count?: number | null
           role?: string | null
           trade_count?: number | null
-          updated_at?: string | null
           user_id?: string | null
           verification_status?: string | null
           verified?: boolean | null
-          weather_location_country?: string | null
-          weather_location_county?: string | null
         }
         Relationships: []
       }
