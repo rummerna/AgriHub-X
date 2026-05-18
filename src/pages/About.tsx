@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Rocket, Eye, Target, Code } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const About = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+      <Seo title="About AgriHubX — Our Story & Mission" description="How students at St. John Tala High School built a privacy-first farming ecosystem for Kenyan farmers." path="/about" />
       {/* Hero */}
       <section className="text-center">
         <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Building the Future of Agriculture</h1>
