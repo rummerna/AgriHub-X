@@ -16,6 +16,8 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         display: ["Sora", "sans-serif"],
+        logo: ["Orbitron", "sans-serif"],
+        tagline: ["'Exo 2'", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
+import { Search, Bell, ShoppingCart, Users, HelpCircle, Wrench, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
@@ -19,11 +20,8 @@ const DesktopNav = () => {
 
   return (
     <header className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border sticky top-0 z-50">
-      <Link to="/" className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-          <Leaf className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <span className="text-xl font-display font-bold text-primary">AgriHubX</span>
+      <Link to="/" aria-label="AgriHubX home">
+        <Logo size={38} wordmarkSize={19} />
       </Link>
 
       <div className="flex-1 max-w-md mx-6">

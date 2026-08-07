@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Leaf, ArrowLeft, ArrowRight, Check, Phone, Loader2, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Phone, Loader2, Mail } from "lucide-react";
+import { LogoMark } from "@/components/brand/Logo";
 import { countries, roles, currencies } from "@/data/mock";
 import PasswordStrength, { isPasswordStrong } from "@/components/PasswordStrength";
 import SignupCelebration from "@/components/SignupCelebration";
@@ -211,9 +212,7 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-2">
-            <Leaf className="w-6 h-6 text-primary-foreground" />
-          </div>
+          <LogoMark size={52} className="mx-auto mb-2" />
           <CardTitle className="font-display text-2xl">Create Account</CardTitle>
           <div className="flex gap-1 justify-center mt-3">
             {steps.map((s, i) => (
