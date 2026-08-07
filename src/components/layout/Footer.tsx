@@ -1,18 +1,12 @@
 import { Link } from "react-router-dom";
-import { Leaf } from "lucide-react";
+import Logo from "@/components/brand/Logo";
 
 const Footer = () => (
   <footer className="bg-card border-t border-border py-8 px-4 hidden md:block">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-              <Leaf className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-primary">AgriHubX</span>
-          </div>
-          <p className="text-xs text-muted-foreground">Connect. Trade. Grow. Globally.</p>
+          <Logo size={40} wordmarkSize={18} tagline="Connect · Trade · Grow" className="mb-3" />
         </div>
         <div>
           <p className="font-semibold text-sm mb-2">Platform</p>
