@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, Bell, User, ShoppingCart, Users, HelpCircle, Wrench, Leaf, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
+import { Search, Bell, ShoppingCart, Users, HelpCircle, Wrench, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
