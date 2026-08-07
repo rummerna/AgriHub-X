@@ -43,7 +43,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-border pt-4 text-center">
-        <p className="text-xs text-muted-foreground">© 2026 Nixon Magenda & Blessed Muriuki, St. John Tala High School. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">© 2026 Nixon Magenda. Sponsored by Valor Incorporated. All rights reserved.</p>
       </div>
     </div>
   </footer>
