@@ -2,16 +2,16 @@ import { Link, useLocation } from "react-router-dom";
 import { Search, Bell, ShoppingCart, Users, HelpCircle, Wrench, LogOut, Gavel, Sprout, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Logo from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/useAuth";
+import AgriHubXLogo from "@/components/AgriHubXLogo";
 
 const navLinks = [
   { to: "/marketplace", label: "Marketplace", icon: ShoppingCart },
-  { to: "/community", label: "Community", icon: Users },
-  { to: "/ask-agri", label: "Ask Agri", icon: HelpCircle },
-  { to: "/services", label: "Services", icon: Wrench },
-  { to: "/auctions", label: "Auctions", icon: Gavel },
-  { to: "/digital-twin", label: "Farm Twin", icon: Sprout },
+  { to: "/community",   label: "Community",   icon: Users },
+  { to: "/ask-agri",    label: "Ask Agri",    icon: HelpCircle },
+  { to: "/services",    label: "Services",    icon: Wrench },
+  { to: "/auctions",    label: "Auctions",    icon: Gavel },
+  { to: "/digital-twin",label: "Farm Twin",   icon: Sprout },
 ];
 
 const DesktopNav = () => {
@@ -20,8 +20,8 @@ const DesktopNav = () => {
 
   return (
     <header className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border sticky top-0 z-50">
-      <Link to="/" aria-label="AgriHubX home">
-        <Logo size={38} wordmarkSize={19} />
+      <Link to="/" className="flex items-center">
+        <AgriHubXLogo size="sm" />
       </Link>
 
       <div className="flex-1 max-w-md mx-6">
