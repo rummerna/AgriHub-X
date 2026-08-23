@@ -503,6 +503,7 @@ export type Database = {
           delivery_address: string | null
           delivery_fee: number
           id: string
+          mpesa_checkout_request_id: string | null
           payment_method: string | null
           seller_id: string | null
           status: string
@@ -515,6 +516,7 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_checkout_request_id?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
@@ -527,6 +529,7 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_checkout_request_id?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
@@ -1107,7 +1110,13 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:
