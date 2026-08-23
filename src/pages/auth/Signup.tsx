@@ -50,12 +50,12 @@ const Signup = () => {
       await signup(email, password, { full_name: fullName, phone });
       setSignupDone(true);
 
-      // If phone provided, attempt SMS OTP via Twilio edge function
+      // If phone provided, attempt SMS OTP via Twilio edge function.
+      // The code is generated and verified server-side.
       if (phone) {
         try {
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
-          const { data, error } = await supabase.functions.invoke("send-otp-sms", {
-            body: { phone, otp },
+          const { data } = await supabase.functions.invoke("send-otp-sms", {
+            body: { action: "send", phone },
           });
           if (data?.success) {
             setOtpMethod("sms");
