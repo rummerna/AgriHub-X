@@ -503,6 +503,7 @@ export type Database = {
           delivery_address: string | null
           delivery_fee: number
           id: string
+          mpesa_checkout_request_id: string | null
           payment_method: string | null
           seller_id: string | null
           status: string
@@ -515,6 +516,7 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_checkout_request_id?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
@@ -527,11 +529,45 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_checkout_request_id?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      phone_otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed?: boolean
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed?: boolean
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
           user_id?: string
         }
         Relationships: []
@@ -1107,7 +1143,13 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:
@@ -1117,6 +1159,7 @@ export type Database = {
         | "transporter"
         | "vet"
         | "agronomist"
+        | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1251,6 +1294,7 @@ export const Constants = {
         "transporter",
         "vet",
         "agronomist",
+        "admin",
       ],
     },
   },

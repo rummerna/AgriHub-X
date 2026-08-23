@@ -6,35 +6,80 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // --- Authentication: require a valid signed-in user ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await authClient.auth.getUser();
+    const user = userData?.user;
+    if (userErr || !user) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+
     const { phone, amount, orderId, accountRef } = await req.json();
 
     if (!phone || !amount || !orderId) {
-      return new Response(JSON.stringify({ error: "Missing required fields: phone, amount, orderId" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Missing required fields: phone, amount, orderId" }, 400);
+    }
+    if (typeof phone !== "string" || !/^(?:254\d{9}|\+254\d{9})$/.test(phone)) {
+      return json({ error: "Invalid phone number. Use format 2547XXXXXXXX" }, 400);
+    }
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || numericAmount > 500000) {
+      return json({ error: "Invalid amount" }, 400);
+    }
+    if (typeof orderId !== "string" || !/^[0-9a-f-]{36}$/i.test(orderId)) {
+      return json({ error: "Invalid orderId" }, 400);
+    }
+
+    const admin = createClient(supabaseUrl, serviceKey);
+
+    // --- Authorization: caller must own the order ---
+    const { data: order } = await admin
+      .from("orders")
+      .select("id, user_id, status, total_amount")
+      .eq("id", orderId)
+      .maybeSingle();
+
+    if (!order || order.user_id !== user.id) {
+      return json({ error: "Order not found" }, 404);
+    }
+    if (!["pending", "pending_payment", "negotiating"].includes(order.status)) {
+      return json({ error: "Order is not payable" }, 400);
     }
 
     const CONSUMER_KEY = Deno.env.get("MPESA_CONSUMER_KEY");
     const CONSUMER_SECRET = Deno.env.get("MPESA_CONSUMER_SECRET");
     const PASSKEY = Deno.env.get("MPESA_PASSKEY");
     const SHORTCODE = Deno.env.get("MPESA_SHORTCODE") || "174379";
+    const CALLBACK_SECRET = Deno.env.get("MPESA_CALLBACK_SECRET") || "";
     const CALLBACK_URL = Deno.env.get("MPESA_CALLBACK_URL");
 
-    if (!CONSUMER_KEY || !CONSUMER_SECRET) {
-      return new Response(JSON.stringify({ error: "M-PESA credentials not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!CONSUMER_KEY || !CONSUMER_SECRET || !PASSKEY) {
+      return json({ error: "M-PESA credentials not configured" }, 500);
     }
 
-    // Step 1: Get OAuth token
+    // Step 1: OAuth token
     const auth = btoa(`${CONSUMER_KEY}:${CONSUMER_SECRET}`);
     const tokenRes = await fetch(
       "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
@@ -42,29 +87,33 @@ serve(async (req) => {
     );
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
-
     if (!accessToken) {
-      return new Response(JSON.stringify({ error: "Failed to get M-PESA access token" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Payment provider unavailable" }, 502);
     }
 
-    // Step 2: STK Push
+    // Step 2: STK push
     const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
-    const password = btoa(`${SHORTCODE}${PASSKEY || "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"}${timestamp}`);
+    const password = btoa(`${SHORTCODE}${PASSKEY}${timestamp}`);
+    const baseCallback =
+      CALLBACK_URL || `${supabaseUrl}/functions/v1/mpesa-callback`;
+    const callbackWithSecret = CALLBACK_SECRET
+      ? `${baseCallback}?secret=${encodeURIComponent(CALLBACK_SECRET)}`
+      : baseCallback;
 
     const stkPayload = {
       BusinessShortCode: SHORTCODE,
       Password: password,
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
-      Amount: Math.ceil(amount),
-      PartyA: phone,
+      Amount: Math.ceil(numericAmount),
+      PartyA: phone.replace("+", ""),
       PartyB: SHORTCODE,
-      PhoneNumber: phone,
-      CallBackURL: CALLBACK_URL || `https://rvanyvorxmobojknpbhp.supabase.co/functions/v1/mpesa-callback`,
-      AccountReference: accountRef || `AGX-${orderId.slice(0, 8).toUpperCase()}`,
+      PhoneNumber: phone.replace("+", ""),
+      CallBackURL: callbackWithSecret,
+      AccountReference:
+        typeof accountRef === "string" && accountRef.length <= 12
+          ? accountRef
+          : `AGX-${orderId.slice(0, 8).toUpperCase()}`,
       TransactionDesc: `AgriHubX Order ${orderId.slice(0, 8)}`,
     };
 
@@ -82,39 +131,28 @@ serve(async (req) => {
     const stkData = await stkRes.json();
 
     if (stkData.ResponseCode === "0") {
-      // Update order to pending_payment
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabaseClient = createClient(supabaseUrl, supabaseKey);
+      await admin
+        .from("orders")
+        .update({
+          status: "pending",
+          payment_method: "mpesa",
+          mpesa_checkout_request_id: stkData.CheckoutRequestID,
+        })
+        .eq("id", orderId)
+        .eq("user_id", user.id);
 
-      await supabaseClient.from("orders").update({ 
-        status: "pending",
-        payment_method: "mpesa" 
-      }).eq("id", orderId);
-
-      return new Response(JSON.stringify({
+      return json({
         success: true,
         checkoutRequestId: stkData.CheckoutRequestID,
         merchantRequestId: stkData.MerchantRequestID,
         message: "STK push sent. Check your phone.",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } else {
-      return new Response(JSON.stringify({
-        success: false,
-        error: stkData.errorMessage || stkData.ResponseDescription || "STK push failed",
-        details: stkData,
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    console.error("STK push rejected:", JSON.stringify(stkData));
+    return json({ success: false, error: "Payment request could not be sent" }, 400);
   } catch (err) {
     console.error("M-PESA STK Push error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: "Payment request failed" }, 500);
   }
 });
