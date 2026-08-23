@@ -88,6 +88,24 @@ const Signup = () => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
+      // SMS codes are verified server-side
+      if (otpMethod === "sms" && otpValue !== "123456") {
+        const { data } = await supabase.functions.invoke("send-otp-sms", {
+          body: { action: "verify", code: otpValue },
+        });
+        if (data?.success) {
+          try { await login(email, password); } catch { /* session may already exist */ }
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            await supabase.from("profiles").update({ country: "Kenya", county: "Nairobi" }).eq("user_id", session.user.id);
+          }
+          toast({ title: "Phone verified!" });
+          setStep(2);
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Accept mock OTP 123456 for development
       if (otpValue === "123456") {
         // Mock verification: just sign in directly
