@@ -425,6 +425,75 @@ export type Database = {
           },
         ]
       }
+      mpesa_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          details: Json
+          id: string
+          message: string
+          severity: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          details?: Json
+          id?: string
+          message: string
+          severity?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          message?: string
+          severity?: string
+        }
+        Relationships: []
+      }
+      mpesa_callback_events: {
+        Row: {
+          amount: number | null
+          checkout_request_id: string | null
+          created_at: string
+          id: string
+          merchant_request_id: string | null
+          order_id: string | null
+          outcome: string
+          reason: string | null
+          result_code: number | null
+        }
+        Insert: {
+          amount?: number | null
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          merchant_request_id?: string | null
+          order_id?: string | null
+          outcome: string
+          reason?: string | null
+          result_code?: number | null
+        }
+        Update: {
+          amount?: number | null
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          merchant_request_id?: string | null
+          order_id?: string | null
+          outcome?: string
+          reason?: string | null
+          result_code?: number | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1167,6 +1236,30 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mpesa_callback_health: {
+        Args: { _minutes?: number }
+        Returns: {
+          duplicates: number
+          failed: number
+          failure_rate: number
+          mismatches: number
+          rejected: number
+          succeeded: number
+          total: number
+        }[]
+      }
+      record_mpesa_callback_event: {
+        Args: {
+          _amount?: number
+          _checkout_request_id?: string
+          _merchant_request_id?: string
+          _order_id?: string
+          _outcome: string
+          _reason?: string
+          _result_code?: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
