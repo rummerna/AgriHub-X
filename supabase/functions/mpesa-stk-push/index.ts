@@ -57,7 +57,7 @@ serve(async (req) => {
     // --- Authorization: caller must own the order ---
     const { data: order } = await admin
       .from("orders")
-      .select("id, user_id, status, total_amount")
+      .select("id, user_id, status, total_amount, mpesa_checkout_request_id, mpesa_requested_at")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -66,6 +66,23 @@ serve(async (req) => {
     }
     if (!["pending", "pending_payment", "negotiating"].includes(order.status)) {
       return json({ error: "Order is not payable" }, 400);
+    }
+
+    // The amount is always taken from the order itself — never trusted from the client.
+    const orderTotal = Number(order.total_amount);
+    if (!Number.isFinite(orderTotal) || orderTotal <= 0) {
+      return json({ error: "Order has an invalid total" }, 400);
+    }
+    if (Math.abs(numericAmount - orderTotal) > 0.5) {
+      return json({ error: "Amount does not match the order total" }, 400);
+    }
+
+    // Throttle: don't allow a new STK push while a recent one is still outstanding.
+    if (order.mpesa_requested_at) {
+      const ageMs = Date.now() - new Date(order.mpesa_requested_at).getTime();
+      if (ageMs < 60_000) {
+        return json({ error: "A payment request is already in progress. Try again shortly." }, 429);
+      }
     }
 
     const CONSUMER_KEY = Deno.env.get("MPESA_CONSUMER_KEY");
@@ -105,7 +122,7 @@ serve(async (req) => {
       Password: password,
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
-      Amount: Math.ceil(numericAmount),
+      Amount: Math.ceil(orderTotal),
       PartyA: phone.replace("+", ""),
       PartyB: SHORTCODE,
       PhoneNumber: phone.replace("+", ""),
@@ -131,15 +148,25 @@ serve(async (req) => {
     const stkData = await stkRes.json();
 
     if (stkData.ResponseCode === "0") {
-      await admin
+      const { error: updErr } = await admin
         .from("orders")
         .update({
           status: "pending",
           payment_method: "mpesa",
           mpesa_checkout_request_id: stkData.CheckoutRequestID,
+          mpesa_merchant_request_id: stkData.MerchantRequestID ?? null,
+          mpesa_amount_expected: Math.ceil(orderTotal),
+          mpesa_phone: phone.replace("+", ""),
+          mpesa_requested_at: new Date().toISOString(),
         })
         .eq("id", orderId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .in("status", ["pending", "pending_payment", "negotiating"]);
+
+      if (updErr) {
+        console.error("Failed to record STK request:", updErr.message);
+        return json({ error: "Payment request could not be recorded" }, 500);
+      }
 
       return json({
         success: true,

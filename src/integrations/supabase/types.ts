@@ -503,7 +503,13 @@ export type Database = {
           delivery_address: string | null
           delivery_fee: number
           id: string
+          mpesa_amount_expected: number | null
           mpesa_checkout_request_id: string | null
+          mpesa_merchant_request_id: string | null
+          mpesa_phone: string | null
+          mpesa_receipt: string | null
+          mpesa_requested_at: string | null
+          paid_at: string | null
           payment_method: string | null
           seller_id: string | null
           status: string
@@ -516,7 +522,13 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_amount_expected?: number | null
           mpesa_checkout_request_id?: string | null
+          mpesa_merchant_request_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt?: string | null
+          mpesa_requested_at?: string | null
+          paid_at?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
@@ -529,7 +541,13 @@ export type Database = {
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
+          mpesa_amount_expected?: number | null
           mpesa_checkout_request_id?: string | null
+          mpesa_merchant_request_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt?: string | null
+          mpesa_requested_at?: string | null
+          paid_at?: string | null
           payment_method?: string | null
           seller_id?: string | null
           status?: string
