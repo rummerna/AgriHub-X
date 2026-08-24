@@ -148,15 +148,25 @@ serve(async (req) => {
     const stkData = await stkRes.json();
 
     if (stkData.ResponseCode === "0") {
-      await admin
+      const { error: updErr } = await admin
         .from("orders")
         .update({
           status: "pending",
           payment_method: "mpesa",
           mpesa_checkout_request_id: stkData.CheckoutRequestID,
+          mpesa_merchant_request_id: stkData.MerchantRequestID ?? null,
+          mpesa_amount_expected: Math.ceil(orderTotal),
+          mpesa_phone: phone.replace("+", ""),
+          mpesa_requested_at: new Date().toISOString(),
         })
         .eq("id", orderId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .in("status", ["pending", "pending_payment", "negotiating"]);
+
+      if (updErr) {
+        console.error("Failed to record STK request:", updErr.message);
+        return json({ error: "Payment request could not be recorded" }, 500);
+      }
 
       return json({
         success: true,
