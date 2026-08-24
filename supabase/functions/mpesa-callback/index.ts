@@ -32,12 +32,15 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const resultCode = body?.Body?.stkCallback?.ResultCode;
-    const checkoutRequestId = body?.Body?.stkCallback?.CheckoutRequestID;
+    const stk = body?.Body?.stkCallback;
+    const resultCode = stk?.ResultCode;
+    const checkoutRequestId = stk?.CheckoutRequestID;
+    const merchantRequestId = stk?.MerchantRequestID;
 
-    if (typeof checkoutRequestId !== "string" || !checkoutRequestId) {
-      return accepted("Missing CheckoutRequestID");
+    if (typeof checkoutRequestId !== "string" || !/^[\w.-]{5,64}$/.test(checkoutRequestId)) {
+      return accepted("Missing or malformed CheckoutRequestID");
     }
+
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
