@@ -57,7 +57,7 @@ serve(async (req) => {
     // --- Authorization: caller must own the order ---
     const { data: order } = await admin
       .from("orders")
-      .select("id, user_id, status, total_amount")
+      .select("id, user_id, status, total_amount, mpesa_checkout_request_id, mpesa_requested_at")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -66,6 +66,23 @@ serve(async (req) => {
     }
     if (!["pending", "pending_payment", "negotiating"].includes(order.status)) {
       return json({ error: "Order is not payable" }, 400);
+    }
+
+    // The amount is always taken from the order itself — never trusted from the client.
+    const orderTotal = Number(order.total_amount);
+    if (!Number.isFinite(orderTotal) || orderTotal <= 0) {
+      return json({ error: "Order has an invalid total" }, 400);
+    }
+    if (Math.abs(numericAmount - orderTotal) > 0.5) {
+      return json({ error: "Amount does not match the order total" }, 400);
+    }
+
+    // Throttle: don't allow a new STK push while a recent one is still outstanding.
+    if (order.mpesa_requested_at) {
+      const ageMs = Date.now() - new Date(order.mpesa_requested_at).getTime();
+      if (ageMs < 60_000) {
+        return json({ error: "A payment request is already in progress. Try again shortly." }, 429);
+      }
     }
 
     const CONSUMER_KEY = Deno.env.get("MPESA_CONSUMER_KEY");
