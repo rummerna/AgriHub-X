@@ -122,7 +122,7 @@ serve(async (req) => {
       Password: password,
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
-      Amount: Math.ceil(numericAmount),
+      Amount: Math.ceil(orderTotal),
       PartyA: phone.replace("+", ""),
       PartyB: SHORTCODE,
       PhoneNumber: phone.replace("+", ""),
