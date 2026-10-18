@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import MpesaMonitor from "@/components/admin/MpesaMonitor";
 
 interface AdminStats {
   totalUsers: number;
@@ -167,7 +168,12 @@ const AdminDashboard = () => {
               <Badge variant="destructive" className="ml-1 text-[10px] px-1.5">{stats.pendingVerifications}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="payments" className="flex-1">Payments</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="payments" className="space-y-4">
+          <MpesaMonitor />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
