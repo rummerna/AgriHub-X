@@ -28,7 +28,7 @@ const Terms = () => (
 
       <section>
         <h2 className="text-xl font-display font-semibold">Intellectual Property</h2>
-        <p className="text-muted-foreground">All rights to AgriHubX — including its name, concept, design, and source code — are reserved by Nixon Magenda and Blessed Muriuki, St. John Tala High School, February 2026.</p>
+        <p className="text-muted-foreground">AgriHubX — including its name, concept, design, and source code — is protected by applicable intellectual property laws. All rights reserved.</p>
       </section>
 
       <section>
