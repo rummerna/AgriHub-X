@@ -6,7 +6,6 @@ import { Download, Mail } from "lucide-react";
 
 const coverage = [
   { date: "Feb 2026", title: "St. John Tala High School Students Create Farming App", source: "Local News" },
-  { date: "Jan 2026", title: "How Two Students Interviewed 25 Farmers on Bicycles to Build AgriHubX", source: "Education News" },
   { date: "Dec 2025", title: "Student Innovation: AgriHubX Selected for KSEF", source: "School Newsletter" },
 ];
 
@@ -38,7 +37,7 @@ const Press = () => (
         <CardContent className="p-6 text-center">
           <Download className="w-8 h-8 mx-auto text-primary mb-2" />
           <h3 className="font-semibold mb-1">Press Kit</h3>
-          <p className="text-sm text-muted-foreground mb-3">Logo, screenshots, and founder bios</p>
+          <p className="text-sm text-muted-foreground mb-3">Logo and screenshots</p>
           <Button variant="outline">Download Press Kit</Button>
         </CardContent>
       </Card>
