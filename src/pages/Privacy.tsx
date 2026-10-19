@@ -10,7 +10,7 @@ const Privacy = () => (
     <div className="prose prose-sm max-w-none space-y-6">
       <section>
         <h2 className="text-xl font-display font-semibold">Our Commitment</h2>
-        <p className="text-muted-foreground">As student developers, we take your privacy seriously. Our no-GPS-tracking policy came directly from listening to 25 farmers in Tala who told us they were uncomfortable with constant location tracking. AgriHubX is designed with privacy at its core, aligned with the Kenya Data Protection Act 2019.</p>
+        <p className="text-muted-foreground">We take your privacy seriously. AgriHubX does not use GPS tracking; location sharing is based on voluntary country and county selection. AgriHubX is designed with privacy at its core, aligned with the Kenya Data Protection Act 2019.</p>
       </section>
 
       <section>

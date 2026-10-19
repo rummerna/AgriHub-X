@@ -6,10 +6,8 @@ import { Search } from "lucide-react";
 import Seo from "@/components/Seo";
 
 const posts = [
-  { id: "1", title: "The Pawpaw Tree That Started It All: Blessed's Story", category: "Founder's Journey", excerpt: "When Blessed's pawpaw tree began dying, he searched everywhere for help. What he found instead was a problem affecting millions of farmers…", date: "Feb 15, 2026" },
-  { id: "2", title: "25 Farmers, 25 Stories: What We Learned Riding Bicycles Through Tala", category: "Farmer Stories", excerpt: "Blessed rode his bicycle across the Tala region to meet farmers directly. Their responses shaped everything about AgriHubX…", date: "Feb 10, 2026" },
   { id: "3", title: "Building an App from Scratch: Nixon's Self-Taught Journey", category: "School Innovation", excerpt: "Every line of code was written specifically for AgriHubX. No templates, no frameworks — just determination and WiFi…", date: "Feb 5, 2026" },
-  { id: "4", title: "How Privacy Became Our Priority: Lessons from Farmers", category: "Agricultural Tips", excerpt: "25 farmers told us the same thing: they were uncomfortable with apps tracking their location. So we built AgriHubX without GPS…", date: "Jan 28, 2026" },
+  { id: "4", title: "Privacy First: No GPS Tracking", category: "Agricultural Tips", excerpt: "AgriHubX uses voluntary country and county selection instead of GPS tracking, keeping location sharing in your control.", date: "Jan 28, 2026" },
 ];
 
 const blogJsonLd = {
