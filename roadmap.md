@@ -1,3 +1,8 @@
+# Buyer contact channels
+
+- [x] Add WhatsApp and email links on the Contact page, product listings and checkout.
+- [x] Verify the links open correctly in the preview for a signed-in buyer with an item in the cart.
+
 # Content removal
 
 - [x] Remove Blessed-related blog posts and named website credits.
