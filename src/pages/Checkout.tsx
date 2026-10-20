@@ -10,6 +10,7 @@ import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import ContactReach from "@/components/ContactReach";
 
 const paymentMethods = [
   { id: "mpesa", label: "M-PESA", desc: "Pay via M-PESA" },
@@ -181,6 +182,19 @@ const Checkout = () => {
             <span>Total</span>
             <span>{currency} {total.toLocaleString()}</span>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">Need help before ordering?</p>
+            <p className="text-xs text-muted-foreground">Ask about availability or delivery first — no sign-in needed.</p>
+          </div>
+          <ContactReach
+            message={`Hi AgriHubX! I have a question before ordering: ${items.map(i => `${i.title} ×${i.quantity}`).join(", ")} — total ${currency} ${total.toLocaleString()}.`}
+            emailSubject="Question before placing an order"
+          />
         </CardContent>
       </Card>
 
