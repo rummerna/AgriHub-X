@@ -14,6 +14,7 @@ import { useSavedItems } from "@/hooks/useSavedItems";
 import { useCurrency } from "@/hooks/useCurrency";
 import ReviewList from "@/components/ReviewList";
 import Seo from "@/components/Seo";
+import ContactReach from "@/components/ContactReach";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -171,6 +172,18 @@ const ProductDetailPage = () => {
             <Button variant="outline" size="icon" onClick={() => toggleSave(product.id)}>
               {isSaved ? <BookmarkCheck className="w-4 h-4 text-primary" /> : <Bookmark className="w-4 h-4" />}
             </Button>
+          </div>
+
+          {/* Buyers who aren't ready to sign in can still ask a human first */}
+          <div className="rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-sm font-medium mb-1">Questions before ordering?</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              Message us on WhatsApp or email and we'll confirm availability, quantity and delivery before you commit.
+            </p>
+            <ContactReach
+              message={`Hi AgriHubX! I have a question about "${product.title}" (${formatPrice(Number(product.price), product.currency || "KES")} per ${product.unit || "kg"}).`}
+              emailSubject={`Question about listing: ${product.title}`}
+            />
           </div>
         </div>
       </div>
