@@ -79,7 +79,7 @@ const Marketplace = () => {
       <Seo title="Marketplace — Buy & Sell Crops, Livestock & Inputs | AgriHubX" description="Browse and list crops, livestock, fertilizers and equipment on the AgriHubX marketplace. Trusted sellers, fair pricing." path="/marketplace" />
       <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
         <h1 className="text-2xl md:text-3xl font-display font-bold">Marketplace</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link to="/cart">
             <Button variant="outline" className="gap-1.5 relative">
               <ShoppingCart className="w-4 h-4" /> Cart
