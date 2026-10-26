@@ -19,7 +19,7 @@ const DesktopNav = () => {
   const { isLoggedIn, user, logout } = useAuth();
 
   return (
-    <header className="hidden md:flex items-center justify-between px-6 py-3 bg-card border-b border-border sticky top-0 z-50">
+    <header className="hidden lg:flex items-center justify-between px-6 py-3 bg-card border-b border-border sticky top-0 z-50">
       <Link to="/" className="flex items-center">
         <AgriHubXLogo size="sm" />
       </Link>
