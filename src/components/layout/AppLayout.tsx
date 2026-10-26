@@ -11,7 +11,7 @@ const AppLayout = () => {
   useTheme(user?.country || "Kenya");
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-16 lg:pb-0">
+    <div className="min-h-screen bg-background flex flex-col pb-24 lg:pb-0">
       <DesktopNav />
       <MobileTopBar />
       <main className="flex-1">
