@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import DesktopNav from "./DesktopNav";
+import MobileTopBar from "./MobileTopBar";
 import MobileNav from "./MobileNav";
 import Footer from "./Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,9 +11,10 @@ const AppLayout = () => {
   useTheme(user?.country || "Kenya");
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-16 lg:pb-0">
       <DesktopNav />
-      <main className="flex-1 pb-20 md:pb-0">
+      <MobileTopBar />
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
