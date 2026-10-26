@@ -21,7 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const tabs = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/marketplace", label: "Market", icon: ShoppingCart },
+  { to: "/marketplace", label: "Marketplace", icon: ShoppingCart },
   { to: "/community", label: "Community", icon: Users },
   { to: "/ask-agri", label: "Ask Agri", icon: HelpCircle },
 ];
