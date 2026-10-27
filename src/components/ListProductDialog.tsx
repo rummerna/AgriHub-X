@@ -17,9 +17,10 @@ const grades = ["Grade A (Premium)", "Grade B (Standard)", "Grade C (Economy)", 
 
 interface Props {
   onProductListed?: () => void;
+  floating?: boolean;
 }
 
-const ListProductDialog = ({ onProductListed }: Props) => {
+const ListProductDialog = ({ onProductListed, floating }: Props) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -85,9 +86,18 @@ const ListProductDialog = ({ onProductListed }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-1.5 bg-primary hover:bg-primary/90">
-          <Plus className="w-4 h-4" /> List Product
-        </Button>
+        {floating ? (
+          <Button
+            aria-label="List a product"
+            className="fixed bottom-[4.75rem] right-4 z-40 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 sm:hidden"
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+        ) : (
+          <Button className="gap-1.5 bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4" /> List Product
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
