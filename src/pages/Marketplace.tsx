@@ -81,7 +81,13 @@ const Marketplace = () => {
         <h1 className="text-2xl md:text-3xl font-display font-bold">Marketplace</h1>
         <div className="flex gap-2 flex-wrap">
           <Link to="/cart">
-            <Button variant="outline" className="gap-1.5 relative">
+            <Button variant="outline" size="icon" className="relative sm:hidden" aria-label="Cart">
+              <ShoppingCart className="w-4 h-4" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
+              )}
+            </Button>
+            <Button variant="outline" className="gap-1.5 relative hidden sm:inline-flex">
               <ShoppingCart className="w-4 h-4" /> Cart
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">{itemCount}</span>
@@ -89,13 +95,19 @@ const Marketplace = () => {
             </Button>
           </Link>
           <Link to="/saved">
-            <Button variant="outline" className="gap-1.5"><Bookmark className="w-4 h-4" /> Saved</Button>
+            <Button variant="outline" size="icon" className="sm:hidden" aria-label="Saved"><Bookmark className="w-4 h-4" /></Button>
+            <Button variant="outline" className="gap-1.5 hidden sm:inline-flex"><Bookmark className="w-4 h-4" /> Saved</Button>
           </Link>
           <Link to="/auctions">
-            <Button variant="outline" className="gap-1.5"><Gavel className="w-4 h-4" /> Live Auctions</Button>
+            <Button variant="outline" className="gap-1.5 hidden sm:inline-flex"><Gavel className="w-4 h-4" /> Live Auctions</Button>
           </Link>
-          <ListProductDialog onProductListed={fetchProducts} />
+          <div className="hidden sm:block">
+            <ListProductDialog onProductListed={fetchProducts} />
+          </div>
         </div>
+      </div>
+      <div className="sm:hidden">
+        <ListProductDialog floating onProductListed={fetchProducts} />
       </div>
       <p className="text-muted-foreground mb-4 text-sm">Browse crops, livestock, inputs, and equipment</p>
 
@@ -104,10 +116,13 @@ const Marketplace = () => {
         <Input placeholder="What do you need? Search products, sellers..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
       </div>
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-6 overflow-x-auto lg:flex-wrap lg:overflow-visible pb-1">
         {mainCategories.map((cat) => (
-          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(cat)}>{cat}</Button>
+          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" className="shrink-0" onClick={() => setActiveCategory(cat)}>{cat}</Button>
         ))}
+        <Link to="/auctions" className="sm:hidden shrink-0 self-center">
+          <Badge variant="outline" className="gap-1 py-1.5 px-3 text-xs font-semibold"><Gavel className="w-3 h-3" /> Live Auctions</Badge>
+        </Link>
       </div>
 
       {loading ? (
@@ -118,7 +133,7 @@ const Marketplace = () => {
           <p className="text-sm">Try a different category or search term, or list the first product!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {filtered.map((p) => (
             <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
               <div className="aspect-[4/3] bg-muted flex items-center justify-center">
@@ -149,7 +164,7 @@ const Marketplace = () => {
           <h2 className="font-display font-semibold text-lg mb-3">Accepted Payment Methods</h2>
           <div className="flex flex-wrap gap-3">
             {paymentMethods.map((pm) => (
-              <Badge key={pm.id} variant="secondary" className="text-sm py-2 px-4 gap-2 font-semibold">
+              <Badge key={pm.id} variant="secondary" className="text-xs py-1.5 px-3 gap-1.5 font-semibold sm:text-sm sm:py-2 sm:px-4">
                 <span className="w-7 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">{pm.icon}</span>
                 {pm.name}
               </Badge>
