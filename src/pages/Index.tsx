@@ -101,9 +101,9 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end"><Wind className="w-3 h-3" /> {weather.windSpeed} km/h</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-xs border-t border-border pt-2">
+                <div className="flex md:grid md:grid-cols-7 gap-1 overflow-x-auto text-center text-xs border-t border-border pt-2">
                   {weather.daily.slice(0, 7).map((d) => (
-                    <div key={d.day} className="space-y-0.5">
+                    <div key={d.day} className="space-y-0.5 min-w-[46px] shrink-0 md:min-w-0">
                       <p className="font-medium text-muted-foreground">{d.day}</p>
                       <p className="text-base">{d.icon}</p>
                       <p className="text-[11px] font-medium">{d.high}°/{d.low}°</p>
@@ -119,7 +119,7 @@ const Index = () => {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {quickActions.map(({ to, label, icon: Icon, color }) => (
             <Link key={to} to={to}>
-              <Button variant="outline" className="gap-2 whitespace-nowrap">
+              <Button variant="outline" className="gap-2 whitespace-nowrap shrink-0">
                 <div className={`w-6 h-6 rounded-md ${color} flex items-center justify-center`}>
                   <Icon className="w-3.5 h-3.5 text-primary-foreground" />
                 </div>
@@ -234,9 +234,9 @@ const Index = () => {
                 <p className="text-xs text-muted-foreground">Feels like {weather.feelsLike}°C</p>
               </div>
             </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-xs border-t border-border pt-2">
+            <div className="flex md:grid md:grid-cols-7 gap-1 overflow-x-auto text-center text-xs border-t border-border pt-2">
               {weather.daily.slice(0, 7).map((d) => (
-                <div key={d.day} className="space-y-0.5">
+                <div key={d.day} className="space-y-0.5 min-w-[46px] shrink-0 md:min-w-0">
                   <p className="font-medium text-muted-foreground">{d.day}</p>
                   <p className="text-base">{d.icon}</p>
                   <p className="text-[11px] font-medium">{d.high}°/{d.low}°</p>

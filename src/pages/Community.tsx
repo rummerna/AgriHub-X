@@ -96,7 +96,7 @@ const Community = () => {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Agri Community</h1>
           <p className="text-muted-foreground text-sm">Connect with farmers in your region</p>
         </div>
-        <Button className="gap-1.5" onClick={() => setShowNew(!showNew)}>
+        <Button className="gap-1.5 hidden lg:inline-flex" onClick={() => setShowNew(!showNew)}>
           {showNew ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showNew ? "Cancel" : "New Post"}
         </Button>
@@ -116,8 +116,18 @@ const Community = () => {
         </Card>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-4">
+      {/* Trending topics — horizontal scroll row on mobile */}
+      <div className="lg:hidden mb-4">
+        <h3 className="font-semibold mb-2 text-sm">🔥 Trending Topics</h3>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {trendingTopics.map((t) => (
+            <Badge key={t} variant="outline" className="text-xs shrink-0 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">{t}</Badge>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : posts.length === 0 ? (
@@ -154,7 +164,7 @@ const Community = () => {
           )}
         </div>
 
-        <aside className="space-y-4">
+        <aside className="space-y-4 hidden lg:block">
           <Card>
             <CardContent className="p-4">
               <h3 className="font-semibold mb-3 text-sm">🔥 Trending Topics</h3>
@@ -167,6 +177,15 @@ const Community = () => {
           </Card>
         </aside>
       </div>
+
+      <Button
+        onClick={() => setShowNew(!showNew)}
+        aria-label={showNew ? "Cancel post" : "New post"}
+        size="icon"
+        className="lg:hidden fixed bottom-[4.75rem] right-4 z-40 h-14 w-14 rounded-full shadow-lg"
+      >
+        {showNew ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+      </Button>
     </div>
   );
 };

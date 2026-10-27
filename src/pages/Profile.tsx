@@ -143,9 +143,9 @@ const Profile = () => {
                 ))}
               </div>
             </div>
-            <div className="flex gap-2">
-              <Link to="/saved"><Button variant="outline" size="sm" className="gap-1"><Bookmark className="w-4 h-4" /> Saved</Button></Link>
-              <Button variant="outline" className="gap-1.5" onClick={() => editing ? handleSaveBio() : setEditing(true)} disabled={saving}>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Link to="/saved" className="w-full sm:w-auto"><Button variant="outline" className="gap-1 w-full"><Bookmark className="w-4 h-4" /> Saved</Button></Link>
+              <Button variant="outline" className="gap-1.5 w-full sm:w-auto" onClick={() => editing ? handleSaveBio() : setEditing(true)} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit className="w-4 h-4" />}
                 {editing ? "Save" : "Edit Profile"}
               </Button>
@@ -230,14 +230,14 @@ const Profile = () => {
       {/* Quick Links */}
       <Card className="shadow-md">
         <CardContent className="p-4 space-y-2">
-          <Link to="/orders" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+          <Link to="/orders" className="flex items-center justify-between min-h-[56px] p-2 rounded-lg hover:bg-muted transition-colors">
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">My Orders</span>
             </div>
             <span className="text-xs text-muted-foreground">→</span>
           </Link>
-          <Link to="/saved" className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
+          <Link to="/saved" className="flex items-center justify-between min-h-[56px] p-2 rounded-lg hover:bg-muted transition-colors">
             <div className="flex items-center gap-2">
               <Bookmark className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Saved Items</span>

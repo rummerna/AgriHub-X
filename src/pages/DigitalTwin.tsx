@@ -56,6 +56,7 @@ const DigitalTwin = () => {
   // Chart data from weather hourly
   const hourlyData = weather?.hourly.map((h) => ({ time: h.hour, temp: h.temp, rain: h.rainChance })) ?? [];
   const dailyData = weather?.daily.map((d) => ({ day: d.day, high: d.high, low: d.low, rain: d.rainChance })) ?? [];
+  const chartH = typeof window !== "undefined" && window.innerWidth < 768 ? 150 : 200;
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Sprout className="w-8 h-8 text-primary animate-pulse" /></div>;
@@ -216,7 +217,7 @@ const DigitalTwin = () => {
                 <CardTitle className="text-base flex items-center gap-2"><Thermometer className="w-4 h-4 text-destructive" /> Temperature Trend (24h)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <LineChart data={hourlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
@@ -233,7 +234,7 @@ const DigitalTwin = () => {
                 <CardTitle className="text-base flex items-center gap-2"><CloudRain className="w-4 h-4 text-primary" /> Rainfall Probability (7 days)</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <AreaChart data={dailyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
@@ -253,7 +254,7 @@ const DigitalTwin = () => {
                 <CardTitle className="text-base flex items-center gap-2"><BarChart3 className="w-4 h-4 text-accent" /> 7-Day Yield Impact</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={chartH}>
                   <LineChart data={dailyData.map((d, i) => ({
                     ...d,
                     yield: Math.round(simulation.projectedYield / 7 * (1 + (d.rain > 50 ? -0.1 : 0.02) * (i + 1))),
