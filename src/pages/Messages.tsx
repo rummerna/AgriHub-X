@@ -328,7 +328,7 @@ const Messages = () => {
   // CHAT VIEW
   if (activeConv) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col" style={{ height: "calc(100vh - 130px)" }}>
+      <div className="flex flex-col px-4 py-4 h-[calc(100dvh-7rem)] lg:max-w-4xl lg:mx-auto lg:h-[calc(100vh-130px)]">
         {/* Header */}
         <div className="flex items-center gap-3 pb-3 border-b border-border">
           <Button variant="ghost" size="icon" onClick={() => { setActiveConv(null); setMessages([]); }}>
@@ -524,14 +524,14 @@ const Messages = () => {
         />
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {(["all", "unread", "archived"] as const).map((f) => (
           <Button
             key={f}
             variant={filter === f ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter(f)}
-            className="capitalize"
+            className="capitalize shrink-0"
           >
             {f}
           </Button>
@@ -581,7 +581,7 @@ const Messages = () => {
               {/* Context actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
