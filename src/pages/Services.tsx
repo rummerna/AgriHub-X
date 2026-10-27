@@ -86,7 +86,7 @@ const Services = () => {
         <h1 className="text-2xl md:text-3xl font-display font-bold">Agri Services</h1>
         {isLoggedIn && (
           <Link to="/services/new">
-            <Button size="sm" className="gap-1"><Plus className="w-4 h-4" /> List Service</Button>
+            <Button size="sm" className="gap-1 hidden sm:inline-flex"><Plus className="w-4 h-4" /> List Service</Button>
           </Link>
         )}
       </div>
@@ -97,9 +97,9 @@ const Services = () => {
         <Input placeholder="Search services..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
       </div>
 
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-6 overflow-x-auto lg:flex-wrap lg:overflow-visible pb-1">
         {serviceCategories.map((cat) => (
-          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(cat)}>
+          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" className="shrink-0" onClick={() => setActiveCategory(cat)}>
             {cat}
           </Button>
         ))}
@@ -142,6 +142,12 @@ const Services = () => {
             </Link>
           ))}
         </div>
+      )}
+
+      {isLoggedIn && (
+        <Link to="/services/new" aria-label="List a service" className="sm:hidden fixed bottom-[4.75rem] right-4 z-40">
+          <Button size="icon" className="h-14 w-14 rounded-full shadow-lg"><Plus className="w-6 h-6" /></Button>
+        </Link>
       )}
     </div>
   );

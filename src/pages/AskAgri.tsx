@@ -180,7 +180,7 @@ const AskAgri = () => {
             Ask questions and get AI-powered + expert answers
           </p>
         </div>
-        <Button className="gap-1.5" onClick={() => setShowNew(!showNew)}>
+        <Button className="gap-1.5 hidden lg:inline-flex" onClick={() => setShowNew(!showNew)}>
           {showNew ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showNew ? "Cancel" : "Ask Question"}
         </Button>
@@ -446,6 +446,15 @@ const AskAgri = () => {
           ))
         )}
       </div>
+
+      <Button
+        onClick={() => setShowNew(!showNew)}
+        aria-label={showNew ? "Cancel question" : "Ask question"}
+        size="icon"
+        className="lg:hidden fixed bottom-[4.75rem] right-4 z-40 h-14 w-14 rounded-full shadow-lg"
+      >
+        {showNew ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+      </Button>
     </div>
   );
 };

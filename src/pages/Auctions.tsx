@@ -128,7 +128,7 @@ const Auctions = () => {
           <h1 className="text-2xl md:text-3xl font-display font-bold">Live Auctions</h1>
         </div>
         {isLoggedIn && (
-          <Button onClick={() => setShowCreate(true)} className="gap-1.5">
+          <Button onClick={() => setShowCreate(true)} className="gap-1.5 hidden sm:inline-flex">
             <Plus className="w-4 h-4" /> Create Auction
           </Button>
         )}
@@ -136,7 +136,7 @@ const Auctions = () => {
       <p className="text-muted-foreground mb-4 text-sm">Bid on crops, livestock, inputs, and equipment in real time</p>
 
       {/* Search & Sort */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -147,7 +147,7 @@ const Auctions = () => {
           />
         </div>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -159,12 +159,13 @@ const Auctions = () => {
       </div>
 
       {/* Category Filters */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-6 overflow-x-auto lg:flex-wrap lg:overflow-visible pb-1">
         {categories.map((cat) => (
           <Button
             key={cat}
             variant={activeCategory === cat ? "default" : "outline"}
             size="sm"
+            className="shrink-0"
             onClick={() => setActiveCategory(cat)}
           >
             {cat}
@@ -224,6 +225,17 @@ const Auctions = () => {
             </Link>
           ))}
         </div>
+      )}
+
+      {isLoggedIn && (
+        <Button
+          onClick={() => setShowCreate(true)}
+          aria-label="Create auction"
+          size="icon"
+          className="sm:hidden fixed bottom-[4.75rem] right-4 z-40 h-14 w-14 rounded-full shadow-lg"
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
       )}
 
       <CreateAuctionDialog open={showCreate} onClose={() => setShowCreate(false)} onCreated={fetchAuctions} />
