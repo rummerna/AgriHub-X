@@ -67,7 +67,7 @@ const Index = () => {
         </div>
 
         {/* Daily Brief + Weather */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">🌾 Daily Farm Brief</CardTitle>
@@ -209,7 +209,7 @@ const Index = () => {
       </section>
 
       {/* Daily Brief + Weather (public preview) */}
-      <div className="grid md:grid-cols-2 gap-4 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
         <Card className="shadow-[var(--shadow-card)]">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">🌾 Daily Farm Brief</CardTitle>

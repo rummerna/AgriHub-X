@@ -389,7 +389,7 @@ const AskAgri = () => {
                       {q.answers}
                     </div>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-semibold mb-1">{q.question}</h3>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {q.tags.map((tag) => (
@@ -420,7 +420,7 @@ const AskAgri = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span>by {q.author}</span>
                       <span>{q.time}</span>
                       <button className="flex items-center gap-1 hover:text-primary transition-colors">

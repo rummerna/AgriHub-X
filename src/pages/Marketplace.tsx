@@ -146,7 +146,7 @@ const Marketplace = () => {
                 <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{p.county}, {p.country}</p>
                 <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
                   <Button size="sm" variant="outline" className="gap-1" onClick={() => addToCart(p.id)}>
-                    <ShoppingCart className="w-3 h-3" /> Add
+                    <ShoppingCart className="w-3 h-3" /><span className="hidden sm:inline">Add</span>
                   </Button>
                   <Button size="sm" className="flex-1 gap-1" onClick={() => navigate(`/marketplace/${p.id}`)}><MessageCircle className="w-3 h-3" />Details</Button>
                   <Button size="sm" variant="outline" onClick={() => toggleSave(p.id)}>

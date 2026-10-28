@@ -5,7 +5,7 @@ const Footer = () => (
   <footer className="bg-card border-t border-border py-8 px-4">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-        <div>
+        <div className="col-span-2 md:col-span-1">
           <div className="mb-3">
             <AgriHubXLogo size="md" />
           </div>
