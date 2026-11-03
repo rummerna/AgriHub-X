@@ -1,56 +1,32 @@
 import { Card, CardContent } from "@/components/ui/card";
 import Seo from "@/components/Seo";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Mail } from "lucide-react";
+import { FileText, Mail, MessageCircle } from "lucide-react";
+import { CONTACT_EMAIL, mailtoLink, whatsappLink } from "@/data/contact";
 
-const coverage = [
-  { date: "Feb 2026", title: "St. John Tala High School Students Create Farming App", source: "Local News" },
-  { date: "Dec 2025", title: "Student Innovation: AgriHubX Selected for KSEF", source: "School Newsletter" },
-];
-
+const kitRequest = "Hello AgriHubX team, please send me any available press materials, including your logo and app screenshots. Please let me know what is available.";
 const Press = () => (
   <div className="max-w-4xl mx-auto px-4 py-8">
-    <Seo title="Press & Media Resources — AgriHubX" description="Press releases, media kit, and brand assets for journalists covering AgriHubX." path="/press" />
-    <h1 className="text-3xl font-display font-bold text-center mb-2">AgriHubX in the News</h1>
-    <p className="text-center text-muted-foreground mb-8">Press releases, media coverage, and press kit</p>
-
-    <section className="mb-8">
-      <h2 className="text-xl font-display font-semibold mb-4">Recent Coverage</h2>
-      <div className="space-y-3">
-        {coverage.map((item) => (
-          <Card key={item.title}>
-            <CardContent className="p-4 flex items-start justify-between gap-3">
-              <div>
-                <Badge variant="secondary" className="text-xs mb-1">{item.date}</Badge>
-                <h3 className="font-semibold text-sm">{item.title}</h3>
-                <p className="text-xs text-muted-foreground">{item.source}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
-
+    <Seo title="Press & Media Contact — AgriHubX" description="Journalists can contact AgriHubX with press inquiries and request available press materials." path="/press" />
+    <h1 className="text-3xl font-display font-bold text-center mb-2">AgriHubX Press</h1>
+    <p className="text-center text-muted-foreground mb-8">No press coverage yet. Journalists, please get in touch.</p>
     <div className="grid sm:grid-cols-2 gap-4">
-      <Card className="shadow-md">
-        <CardContent className="p-6 text-center">
-          <Download className="w-8 h-8 mx-auto text-primary mb-2" />
-          <h3 className="font-semibold mb-1">Press Kit</h3>
-          <p className="text-sm text-muted-foreground mb-3">Logo and screenshots</p>
-          <Button variant="outline">Download Press Kit</Button>
-        </CardContent>
-      </Card>
-      <Card className="shadow-md">
-        <CardContent className="p-6 text-center">
-          <Mail className="w-8 h-8 mx-auto text-primary mb-2" />
-          <h3 className="font-semibold mb-1">Media Contact</h3>
-          <p className="text-sm text-muted-foreground mb-3">rummerna@gmail.com</p>
-          <Button variant="outline">Send Press Inquiry</Button>
-        </CardContent>
-      </Card>
+      <Card className="shadow-md"><CardContent className="p-6 text-center">
+        <FileText className="w-8 h-8 mx-auto text-primary mb-2" />
+        <h2 className="font-semibold mb-1">Press Kit</h2>
+        <p className="text-sm text-muted-foreground mb-3">Ask about available logos and screenshots.</p>
+        <div className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="min-h-11"><a href={mailtoLink("Press kit request", kitRequest)}><Mail />Request Press Kit</a></Button>
+          <Button asChild variant="outline" className="min-h-11"><a href={whatsappLink(kitRequest)} target="_blank" rel="noopener noreferrer"><MessageCircle />Request via WhatsApp</a></Button>
+        </div>
+      </CardContent></Card>
+      <Card className="shadow-md"><CardContent className="p-6 text-center">
+        <Mail className="w-8 h-8 mx-auto text-primary mb-2" />
+        <h2 className="font-semibold mb-1">Media Contact</h2>
+        <a href={mailtoLink("Press inquiry", "Hello AgriHubX team, I have a press inquiry: ")} className="block text-sm text-primary break-all mb-3 underline min-h-11 py-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">{CONTACT_EMAIL}</a>
+        <Button asChild variant="outline" className="min-h-11"><a href={mailtoLink("Press inquiry", "Hello AgriHubX team, I have a press inquiry: ")}>Send Press Inquiry</a></Button>
+      </CardContent></Card>
     </div>
   </div>
 );
-
 export default Press;

@@ -38,6 +38,7 @@ import Messages from "./pages/Messages";
 import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import RequireAdmin from "./components/RequireAdmin";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Auth routes (no layout) */}
           <Route path="/auth/login" element={<Login />} />

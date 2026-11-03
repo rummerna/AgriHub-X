@@ -77,7 +77,7 @@ const Index = () => {
               <div className="flex items-center gap-2 text-sm"><Lightbulb className="w-4 h-4 text-accent shrink-0" /><span>Tip: Delay fertilizer application today.</span></div>
               <div className="flex items-center gap-2 text-sm"><TrendingUp className="w-4 h-4 text-secondary shrink-0" /><span>Maize ↑5% this week. Tomatoes stable.</span></div>
               <div className="flex items-center gap-2 text-sm"><Bug className="w-4 h-4 text-destructive shrink-0" /><span>Pest outbreak reported nearby.</span></div>
-              <Link to="/brief"><Button variant="outline" size="sm" className="w-full mt-1">View Full Brief →</Button></Link>
+              <Button asChild variant="outline" size="sm" className="w-full mt-1"><Link to="/brief">View Full Brief →</Link></Button>
             </CardContent>
           </Card>
 
@@ -118,14 +118,14 @@ const Index = () => {
         {/* Quick Actions */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {quickActions.map(({ to, label, icon: Icon, color }) => (
-            <Link key={to} to={to}>
-              <Button variant="outline" className="gap-2 whitespace-nowrap shrink-0">
+            <Button asChild key={to} variant="outline" className="gap-2 whitespace-nowrap shrink-0 min-h-11">
+              <Link to={to}>
                 <div className={`w-6 h-6 rounded-md ${color} flex items-center justify-center`}>
                   <Icon className="w-3.5 h-3.5 text-primary-foreground" />
                 </div>
                 {label}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           ))}
         </div>
 
@@ -135,7 +135,7 @@ const Index = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm">My Active Listings</h3>
-                <Link to="/marketplace"><Button variant="ghost" size="sm" className="text-xs gap-1">View All <ArrowRight className="w-3 h-3" /></Button></Link>
+                <Button asChild variant="ghost" size="sm" className="text-xs gap-1"><Link to="/marketplace">View All <ArrowRight className="w-3 h-3" /></Link></Button>
               </div>
               {statsLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />
@@ -161,7 +161,7 @@ const Index = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm">Recent Orders</h3>
-                <Link to="/orders"><Button variant="ghost" size="sm" className="text-xs gap-1">View All <ArrowRight className="w-3 h-3" /></Button></Link>
+                <Button asChild variant="ghost" size="sm" className="text-xs gap-1"><Link to="/orders">View All <ArrowRight className="w-3 h-3" /></Link></Button>
               </div>
               {statsLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin text-primary mx-auto" />
@@ -203,8 +203,8 @@ const Index = () => {
           Buy, sell, learn, and access daily farm insights — no tracking, just trust.
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
-          <Link to="/auth/signup"><Button size="lg" className="font-semibold text-base px-8">Join Free</Button></Link>
-          <Link to="/marketplace"><Button size="lg" variant="outline" className="font-semibold text-base px-8">Explore Marketplace</Button></Link>
+          <Button asChild size="lg" className="font-semibold text-base px-8"><Link to="/auth/signup">Join Free</Link></Button>
+          <Button asChild size="lg" variant="outline" className="font-semibold text-base px-8"><Link to="/marketplace">Explore Marketplace</Link></Button>
         </div>
       </section>
 
@@ -286,8 +286,8 @@ const Index = () => {
       {/* CTA */}
       <section className="text-center py-12 border-t border-border">
         <h2 className="text-2xl font-display font-bold mb-3">Ready to grow smarter?</h2>
-        <p className="text-muted-foreground mb-6">Join thousands of farmers already trading on AgriHubX.</p>
-        <Link to="/auth/signup"><Button size="lg" className="font-semibold px-8">Get Started — It's Free</Button></Link>
+        <p className="text-muted-foreground mb-6">Create an account to trade and connect on AgriHubX.</p>
+        <Button asChild size="lg" className="font-semibold px-6 min-h-11 h-auto py-3 whitespace-normal scroll-mt-20"><Link to="/auth/signup">Get Started — It's Free</Link></Button>
         <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
           <Shield className="w-3.5 h-3.5" /> No GPS tracking. Your privacy matters.
         </p>
