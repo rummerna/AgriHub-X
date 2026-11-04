@@ -6,3 +6,6 @@
 
 - Public articles and help answers live in shared data modules; search and category counts derive from those records. Why: visible help controls and counts must describe the same real content.
 - Mount the route scroll-reset component inside BrowserRouter above Routes. Why: app, auth and fallback destinations all need the same navigation scroll behavior.
+- Orders are created only through authenticated place_order; status changes use guarded buyer updates or seller_update_order_status. Why: transaction pricing, stock locks and trust fields must not depend on the client.
+- Auction clients use the explicit public column list and the seller-authorized reserve RPC; bid mutations are trigger-owned. Why: reserves stay private and concurrent bids stay atomic.
+- Conversation deletion uses participant-specific flags, and message updates are read-receipt-only. Why: one participant cannot destroy or rewrite the other participant's history.

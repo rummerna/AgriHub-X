@@ -1,0 +1,2 @@
+// Reserve is deliberately excluded: the Data API only grants these public columns.
+export const AUCTION_FIELDS = "id,seller_id,product_name,category,quantity,unit,description,starting_bid,current_bid,current_winner_id,bids_count,start_time,end_time,status,image_url,country,county,currency,created_at,updated_at" as const;

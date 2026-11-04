@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Truck, CheckCircle, Clock, XCircle, ShoppingCart, Loader2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { canBuyerCancel, sellerTransitions } from "@/lib/orderFlow";
 
 interface OrderItem {
   id: string;
@@ -27,6 +29,7 @@ interface Order {
   delivery_address: string | null;
   created_at: string;
   items: OrderItem[];
+  currency: string | null;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
@@ -45,6 +48,18 @@ const Orders = () => {
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [revision, setRevision] = useState(0);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const { toast } = useToast();
+  const updateStatus = async (order: Order, status: string, seller: boolean) => {
+    setUpdating(order.id);
+    const { error } = seller
+      ? await supabase.rpc("seller_update_order_status", { _order_id: order.id, _status: status })
+      : await supabase.from("orders").update({ status }).eq("id", order.id).select("id").single();
+    if (error) toast({ title: "Could not update order", description: error.message, variant: "destructive" });
+    else setRevision(v => v + 1);
+    setUpdating(null);
+  };
 
   useEffect(() => {
     if (!supabaseUser) return;
@@ -76,7 +91,7 @@ const Orders = () => {
       setLoading(false);
     };
     fetchOrders();
-  }, [supabaseUser]);
+  }, [supabaseUser, revision]);
 
   const enrichOrders = async (orders: any[]): Promise<Order[]> => {
     const orderIds = orders.map(o => o.id);
@@ -98,6 +113,7 @@ const Orders = () => {
       id: o.id,
       total_amount: o.total_amount,
       delivery_fee: o.delivery_fee,
+      currency: o.currency || ([...new Set((allItems || []).filter(i => i.order_id === o.id).map(i => i.currency))].length === 1 ? (allItems || []).find(i => i.order_id === o.id)?.currency : null),
       status: o.status,
       payment_method: o.payment_method,
       delivery_address: o.delivery_address,
@@ -145,7 +161,7 @@ const Orders = () => {
     );
   };
 
-  const renderOrderCard = (order: Order) => {
+  const renderOrderCard = (order: Order, seller = false) => {
     const config = statusConfig[order.status] || statusConfig.pending;
     const StatusIcon = config.icon;
 
@@ -191,7 +207,7 @@ const Orders = () => {
 
           <div className="flex items-center justify-between border-t border-border pt-2">
             <span className="text-sm font-bold">
-              KES {order.total_amount.toLocaleString()}
+              {order.currency || "Currency unavailable"} {order.total_amount.toLocaleString()}
             </span>
             {order.payment_method && (
               <span className="text-xs text-muted-foreground capitalize">{order.payment_method}</span>
@@ -199,6 +215,13 @@ const Orders = () => {
           </div>
 
           {renderStatusTimeline(order.status)}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {(seller ? sellerTransitions(order.status) : canBuyerCancel(order.status) ? ["cancelled"] : []).map(status => (
+              <Button key={status} variant={status === "cancelled" ? "outline" : "default"} disabled={updating === order.id} onClick={() => updateStatus(order, status, seller)}>
+                {status === "cancelled" ? "Cancel order" : `Mark ${status}`}
+              </Button>
+            ))}
+          </div>
         </CardContent>
       </Card>
     );
@@ -240,7 +263,7 @@ const Orders = () => {
               <Link to="/marketplace"><Button variant="outline">Browse Marketplace</Button></Link>
             </div>
           ) : (
-            <div className="space-y-3">{buyerOrders.map(renderOrderCard)}</div>
+            <div className="space-y-3">{buyerOrders.map(order => renderOrderCard(order))}</div>
           )}
         </TabsContent>
 
@@ -254,7 +277,7 @@ const Orders = () => {
               <Link to="/marketplace"><Button variant="outline">List a Product</Button></Link>
             </div>
           ) : (
-            <div className="space-y-3">{sellerOrders.map(renderOrderCard)}</div>
+            <div className="space-y-3">{sellerOrders.map(order => renderOrderCard(order, true))}</div>
           )}
         </TabsContent>
       </Tabs>

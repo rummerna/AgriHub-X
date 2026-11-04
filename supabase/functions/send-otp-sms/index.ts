@@ -1,11 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3";
+import { generateOtp } from "./code.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
@@ -29,9 +26,10 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !anonKey || !serviceKey) return json({ error: "SMS service configuration is incomplete" }, 503);
 
     // --- Authentication: only signed-in users may trigger or verify SMS codes ---
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -45,11 +43,15 @@ serve(async (req) => {
     if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
     const admin = createClient(supabaseUrl, serviceKey);
-    const payload = await req.json().catch(() => ({}));
-    const action = payload?.action === "verify" ? "verify" : "send";
+    const parsed = z.discriminatedUnion("action", [
+      z.object({ action: z.literal("verify"), code: z.string().regex(/^\d{6}$/) }),
+      z.object({ action: z.literal("send"), phone: z.string().regex(/^\+[1-9]\d{1,14}$/) }),
+    ]).safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return json({ error: "Enter a valid code or international phone number" }, 400);
+    const payload = parsed.data;
 
     // ---------------- verify ----------------
-    if (action === "verify") {
+    if (payload.action === "verify") {
       const code = String(payload?.code ?? "");
       if (!/^\d{6}$/.test(code)) return json({ success: false, error: "Invalid code" }, 400);
 
@@ -80,7 +82,7 @@ serve(async (req) => {
     }
 
     // ---------------- send ----------------
-    const phone = String(payload?.phone ?? "");
+    const phone = String(payload.phone);
     if (!/^\+[1-9]\d{1,14}$/.test(phone)) {
       return json({ error: "Invalid phone number format. Use E.164 (e.g., +254712345678)" }, 400);
     }
@@ -91,8 +93,10 @@ serve(async (req) => {
       return json({ success: false, error: "SMS not configured", fallback: "email" });
     }
 
-    // Server-generated code — never accepted from the client
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const fromNumber = Deno.env.get("TWILIO_FROM");
+    if (!fromNumber) return json({ error: "SMS sender is not configured. Add TWILIO_FROM in Project Settings → Secrets.", fallback: "email" }, 503);
+
+    const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     const { data: inserted, error: insertErr } = await admin
@@ -101,7 +105,7 @@ serve(async (req) => {
       .select("id")
       .single();
     if (insertErr || !inserted) {
-      console.error("Failed to store OTP:", insertErr);
+
       return json({ success: false, error: "Could not send code", fallback: "email" });
     }
     await admin
@@ -109,7 +113,6 @@ serve(async (req) => {
       .update({ code_hash: await hashCode(otp, inserted.id) })
       .eq("id", inserted.id);
 
-    const fromNumber = Deno.env.get("TWILIO_FROM_NUMBER") || "+15005550006";
 
     const response = await fetch(`${GATEWAY_URL}/Messages.json`, {
       method: "POST",
@@ -132,7 +135,7 @@ serve(async (req) => {
 
     return json({ success: true });
   } catch (error) {
-    console.error("Error in send-otp-sms:", error);
+
     return json({ success: false, error: "Unexpected error", fallback: "email" });
   }
 });

@@ -88,77 +88,14 @@ const Signup = () => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      // SMS codes are verified server-side
-      if (otpMethod === "sms" && otpValue !== "123456") {
-        const { data } = await supabase.functions.invoke("send-otp-sms", {
-          body: { action: "verify", code: otpValue },
-        });
-        if (data?.success) {
-          try { await login(email, password); } catch { /* session may already exist */ }
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            await supabase.from("profiles").update({ country: "Kenya", county: "Nairobi" }).eq("user_id", session.user.id);
-          }
-          toast({ title: "Phone verified!" });
-          setStep(2);
-          setIsLoading(false);
-          return;
-        }
+      if (otpMethod === "sms") {
+        const { data, error } = await supabase.functions.invoke("send-otp-sms", { body: { action: "verify", code: otpValue } });
+        if (error || !data?.success) throw new Error(data?.error || "Invalid or expired code");
+        toast({ title: "Phone verified!" });
+      } else {
+        const { error } = await supabase.auth.verifyOtp({ email, token: otpValue, type: "signup" });
+        if (error) throw error;
       }
-
-      // Accept mock OTP 123456 for development
-      if (otpValue === "123456") {
-        // Mock verification: just sign in directly
-        try {
-          await login(email, password);
-        } catch {
-          // May fail if email not confirmed in Supabase, try verifyOtp anyway
-          try {
-            await supabase.auth.verifyOtp({ email, token: otpValue, type: "signup" });
-            await login(email, password);
-          } catch {
-            // Session may already be set
-          }
-        }
-        
-        // Set default location to Nairobi, Kenya
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          await supabase.from("profiles").update({
-            country: "Kenya",
-            county: "Nairobi",
-          }).eq("user_id", session.user.id);
-        }
-
-        toast({ title: "Email verified!" });
-        setStep(2);
-        setIsLoading(false);
-        return;
-      }
-
-      // Real OTP verification
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otpValue,
-        type: "signup",
-      });
-      if (error) throw error;
-
-      try {
-        await login(email, password);
-      } catch {
-        // Session may already be set by verifyOtp
-      }
-
-      // Set default location
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await supabase.from("profiles").update({
-          country: "Kenya",
-          county: "Nairobi",
-        }).eq("user_id", session.user.id);
-      }
-      
       toast({ title: "Email verified!" });
       setStep(2);
     } catch (error: any) {

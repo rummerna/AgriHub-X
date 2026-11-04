@@ -1,5 +1,12 @@
 # Buyer contact channels
 
+# Security and payment batch 1
+
+- [ ] Apply one migration for order pricing/protection, seller transitions, auctions, reviews, chat access/read receipts, and location defaults.
+- [ ] Update Checkout, Orders, auction/chat clients, OTP generation/configuration, and dashboard location prompt.
+- [ ] OTP send limits: waiting for confirmation of custom rate-limiting tradeoff.
+- [ ] Run existing/new tests and authenticated verification; report changed files and remaining limitations.
+
 # Footer destination audit
 
 - [x] Replace unsupported Careers/Press content and connect interest/inquiry actions.
