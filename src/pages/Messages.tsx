@@ -89,7 +89,7 @@ const Messages = () => {
       unreadMap.set(m.conversation_id, (unreadMap.get(m.conversation_id) || 0) + 1);
     });
 
-    const convs: Conversation[] = data.map((c: any) => {
+    const convs: Conversation[] = data.filter(c => c.participant_1_id === uid ? !c.is_deleted_by_1 : !c.is_deleted_by_2).map((c: any) => {
       const otherId = c.participant_1_id === uid ? c.participant_2_id : c.participant_1_id;
       const prof = profileMap.get(otherId);
       const isP1 = c.participant_1_id === uid;
@@ -294,7 +294,12 @@ const Messages = () => {
 
   // Delete conversation
   const deleteConv = async (conv: Conversation) => {
-    await supabase.from("conversations").delete().eq("id", conv.id);
+    if (!uid) return;
+    const { data } = await supabase.from("conversations").select("participant_1_id").eq("id", conv.id).single();
+    if (!data) return;
+    const field = data.participant_1_id === uid ? "is_deleted_by_1" : "is_deleted_by_2";
+    const { error } = await supabase.from("conversations").update({ [field]: true }).eq("id", conv.id);
+    if (error) { toast({ title: "Could not hide conversation", description: error.message, variant: "destructive" }); return; }
     fetchConversations();
     if (activeConv?.id === conv.id) { setActiveConv(null); setMessages([]); }
   };

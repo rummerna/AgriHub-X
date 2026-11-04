@@ -11,12 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ContactReach from "@/components/ContactReach";
+import { submitOrder } from "@/lib/orderFlow";
 
 const paymentMethods = [
   { id: "mpesa", label: "M-PESA", desc: "Pay via M-PESA" },
-  { id: "card", label: "Credit / Debit Card", desc: "Visa, Mastercard via Stripe" },
-  { id: "paypal", label: "PayPal", desc: "Pay with PayPal" },
-  { id: "bank", label: "Bank Transfer", desc: "Manual bank transfer" },
+  { id: "card", label: "Credit / Debit Card", desc: "Seller will contact you to arrange payment" },
+  { id: "paypal", label: "PayPal", desc: "Seller will contact you to arrange payment" },
+  { id: "bank", label: "Bank Transfer", desc: "Seller will contact you to arrange payment" },
 ];
 
 const Checkout = () => {
@@ -39,57 +40,9 @@ const Checkout = () => {
     if (!supabaseUser || items.length === 0) return;
     setPlacing(true);
     try {
-      const { data: order, error: orderErr } = await supabase.from("orders").insert({
-        user_id: supabaseUser.id,
-        total_amount: total,
-        delivery_fee: deliveryFee,
-        payment_method: paymentMethod,
-        delivery_address: address,
-        status: "pending",
-      }).select().single();
-
-      if (orderErr) throw orderErr;
-
-      const orderItems = items.map(i => ({
-        order_id: order.id,
-        product_id: i.product_id,
-        quantity: i.quantity,
-        unit_price: i.price,
-        currency: i.currency,
-      }));
-
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
-      if (itemsErr) throw itemsErr;
-
-      // Notify sellers and reduce stock
-      const productIds = items.map(i => i.product_id);
-      const { data: productsData } = await supabase
-        .from("products")
-        .select("id, user_id, title, quantity")
-        .in("id", productIds);
-
-      if (productsData) {
-        for (const prod of productsData) {
-          const cartItem = items.find(i => i.product_id === prod.id);
-          const newQty = Math.max(0, (prod.quantity || 1) - (cartItem?.quantity || 1));
-
-          // Reduce product quantity
-          await supabase.from("products").update({ quantity: newQty }).eq("id", prod.id);
-
-          // Notify seller
-          if (prod.user_id !== supabaseUser.id) {
-            await supabase.from("notifications").insert({
-              user_id: prod.user_id,
-              type: "new_order",
-              reference_id: order.id,
-              message: `New order for "${prod.title}" (×${cartItem?.quantity || 1})`,
-            });
-          }
-        }
-      }
-
+      const ids = await submitOrder((name, args) => supabase.rpc(name, args), items, paymentMethod, address);
       await clearCart();
-      setOrderId(order.id.slice(0, 8).toUpperCase());
+      setOrderId(ids.map(id => id.slice(0, 8).toUpperCase()).join(", #"));
       setOrderComplete(true);
     } catch (err: any) {
       toast({ title: "Order failed", description: err.message, variant: "destructive" });
@@ -103,7 +56,7 @@ const Checkout = () => {
         <PartyPopper className="w-16 h-16 mx-auto text-primary" />
         <h1 className="text-2xl font-display font-bold text-primary">Order Placed!</h1>
         <p className="text-muted-foreground">Order #{orderId}</p>
-        <p className="text-sm text-muted-foreground">You'll receive a notification when the seller confirms.</p>
+        <p className="text-sm text-muted-foreground">{paymentMethod === "mpesa" ? "You will receive a notification when the seller confirms." : "Seller will contact you to arrange payment"}</p>
         <div className="flex gap-2 justify-center">
           <Link to="/marketplace"><Button variant="outline">Continue Shopping</Button></Link>
           <Link to="/orders"><Button>Track Orders</Button></Link>
@@ -179,7 +132,7 @@ const Checkout = () => {
           ))}
           <div className="flex justify-between text-sm"><span>Delivery</span><span>{currency} {deliveryFee.toLocaleString()}</span></div>
           <div className="flex justify-between font-bold text-lg border-t pt-2">
-            <span>Total</span>
+            <span>Estimated total, confirmed at order</span>
             <span>{currency} {total.toLocaleString()}</span>
           </div>
         </CardContent>
@@ -200,7 +153,7 @@ const Checkout = () => {
 
       <Button className="w-full gap-1.5" size="lg" onClick={placeOrder} disabled={placing || !address.trim()}>
         {placing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-        Place Order ({currency} {total.toLocaleString()})
+        Place Order
       </Button>
     </div>
   );

@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Gavel, MapPin, Clock, User, Shield, Share2, Bookmark, Loader2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AUCTION_FIELDS } from "@/data/auctionFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import AuctionCountdown from "@/components/auction/AuctionCountdown";
@@ -27,6 +28,7 @@ const AuctionDetail = () => {
   const { supabaseUser, isLoggedIn, user } = useAuth();
   const { toast } = useToast();
   const [auction, setAuction] = useState<any>(null);
+  const [reservePrice, setReservePrice] = useState<number | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState("");
@@ -38,15 +40,20 @@ const AuctionDetail = () => {
 
   const fetchAuction = useCallback(async () => {
     if (!id) return;
-    const { data } = await supabase.from("auctions").select("*").eq("id", id).single();
+    const { data } = await supabase.from("auctions").select(AUCTION_FIELDS).eq("id", id).single();
     if (data) {
       setAuction(data);
+      setReservePrice(null);
+      if (supabaseUser?.id === data.seller_id) {
+        const { data: reserve } = await supabase.rpc("get_auction_reserve", { _auction_id: data.id });
+        setReservePrice(reserve);
+      }
       // Get seller name
       const { data: profile } = await supabase.from("profiles_public").select("full_name").eq("user_id", data.seller_id).single();
       if (profile) setSellerName(profile.full_name);
     }
     setLoading(false);
-  }, [id]);
+  }, [id, supabaseUser]);
 
   const fetchBids = useCallback(async () => {
     if (!id) return;
@@ -129,22 +136,6 @@ const AuctionDetail = () => {
       return;
     }
 
-    // Update auction
-    const updateData: any = {
-      current_bid: amount,
-      current_winner_id: supabaseUser.id,
-      bids_count: auction.bids_count + 1,
-    };
-
-    // Auto-extend: if bid placed in last 3 minutes, extend by 3 minutes
-    const msLeft = new Date(auction.end_time).getTime() - Date.now();
-    if (msLeft < 180000 && msLeft > 0) {
-      updateData.end_time = new Date(Date.now() + 180000).toISOString();
-      toast({ title: "⏰ Auction extended!", description: "Bid placed in final 3 minutes – auction extended by 3 minutes." });
-    }
-
-    await supabase.from("auctions").update(updateData).eq("id", auction.id);
-
     setBidAmount("");
     setPlacing(false);
     toast({ title: "Bid placed!", description: `You bid ${auction.currency} ${amount.toLocaleString()}` });
@@ -169,16 +160,6 @@ const AuctionDetail = () => {
     });
 
     if (!error) {
-      const updateData: any = {
-        current_bid: bidAmt,
-        current_winner_id: supabaseUser.id,
-        bids_count: auction.bids_count + 1,
-      };
-      const msLeft = new Date(auction.end_time).getTime() - Date.now();
-      if (msLeft < 180000 && msLeft > 0) {
-        updateData.end_time = new Date(Date.now() + 180000).toISOString();
-      }
-      await supabase.from("auctions").update(updateData).eq("id", auction.id);
       toast({ title: "Auto-bid set!", description: `Auto-bidding up to ${auction.currency} ${max.toLocaleString()}` });
     }
 
@@ -188,7 +169,7 @@ const AuctionDetail = () => {
 
   const isEnded = auction && (auction.status === "ended" || new Date(auction.end_time) < new Date());
   const isSeller = supabaseUser && auction?.seller_id === supabaseUser.id;
-  const reserveMet = auction?.reserve_price ? (auction.current_bid || 0) >= auction.reserve_price : true;
+  const reserveMet = reservePrice ? (auction.current_bid || 0) >= reservePrice : true;
 
   if (loading) {
     return (
@@ -328,7 +309,7 @@ const AuctionDetail = () => {
               </div>
 
               {/* Reserve status */}
-              {auction.reserve_price && (
+              {isSeller && reservePrice !== null && (
                 <div className={`flex items-center gap-1.5 text-xs ${reserveMet ? "text-primary" : "text-destructive"}`}>
                   {reserveMet ? "✅ Reserve price met" : "⚠️ Reserve price not met"}
                 </div>

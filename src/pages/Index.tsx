@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart, Users, HelpCircle, Wrench, CloudRain, TrendingUp, Bug,
   Lightbulb, Shield, Droplets, Wind, Gavel, Package, MessageCircle, ArrowRight,
-  Star, Loader2, CheckCircle, Sprout
+  Star, Loader2, CheckCircle, Sprout, X
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSeason } from "@/hooks/useSeason";
@@ -39,6 +39,7 @@ const Index = () => {
   const [myListings, setMyListings] = useState<any[]>([]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [locationDismissed, setLocationDismissed] = useState(false);
 
   useEffect(() => {
     if (!supabaseUser) return;
@@ -66,6 +67,13 @@ const Index = () => {
           <p className="text-muted-foreground text-sm">Here's your farm overview for today.</p>
         </div>
 
+        {user && (!user.country || !user.county) && !locationDismissed && (
+          <div className="flex items-center gap-3 border border-border rounded-md p-3" role="status">
+            <p className="flex-1 text-sm">Choose your country and county for your daily farm brief.</p>
+            <Button asChild variant="outline"><Link to="/profile">Choose location</Link></Button>
+            <Button variant="ghost" size="icon" aria-label="Dismiss location reminder" onClick={() => setLocationDismissed(true)}><X className="w-4 h-4" /></Button>
+          </div>
+        )}
         {/* Daily Brief + Weather */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="shadow-[var(--shadow-card)]">

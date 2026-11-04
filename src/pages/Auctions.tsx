@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2, Gavel, Plus, Clock, MapPin, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AUCTION_FIELDS } from "@/data/auctionFields";
 import { useAuth } from "@/hooks/useAuth";
 import CreateAuctionDialog from "@/components/auction/CreateAuctionDialog";
 import AuctionCountdown from "@/components/auction/AuctionCountdown";
@@ -29,7 +30,6 @@ interface Auction {
   unit: string;
   starting_bid: number;
   current_bid: number | null;
-  reserve_price: number | null;
   bids_count: number;
   start_time: string;
   end_time: string;
@@ -56,7 +56,7 @@ const Auctions = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("auctions")
-      .select("*")
+      .select(AUCTION_FIELDS)
       .eq("status", "active")
       .order("end_time", { ascending: true });
 

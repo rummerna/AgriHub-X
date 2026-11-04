@@ -82,7 +82,7 @@ serve(async (req) => {
     }
 
     // ---------------- send ----------------
-    const phone = String(payload?.phone ?? "");
+    const phone = String(payload.phone);
     if (!/^\+[1-9]\d{1,14}$/.test(phone)) {
       return json({ error: "Invalid phone number format. Use E.164 (e.g., +254712345678)" }, 400);
     }
@@ -93,8 +93,10 @@ serve(async (req) => {
       return json({ success: false, error: "SMS not configured", fallback: "email" });
     }
 
-    // Server-generated code — never accepted from the client
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const fromNumber = Deno.env.get("TWILIO_FROM");
+    if (!fromNumber) return json({ error: "SMS sender is not configured. Add TWILIO_FROM in Project Settings → Secrets.", fallback: "email" }, 503);
+
+    const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     const { data: inserted, error: insertErr } = await admin
@@ -103,7 +105,7 @@ serve(async (req) => {
       .select("id")
       .single();
     if (insertErr || !inserted) {
-      console.error("Failed to store OTP:", insertErr);
+
       return json({ success: false, error: "Could not send code", fallback: "email" });
     }
     await admin
@@ -133,7 +135,7 @@ serve(async (req) => {
 
     return json({ success: true });
   } catch (error) {
-    console.error("Error in send-otp-sms:", error);
+
     return json({ success: false, error: "Unexpected error", fallback: "email" });
   }
 });
