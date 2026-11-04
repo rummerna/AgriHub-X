@@ -22,6 +22,8 @@ const Profile = () => {
   const [bio, setBio] = useState("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [country, setCountry] = useState("");
+  const [county, setCounty] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ listings: 0, posts: 0 });
@@ -36,6 +38,8 @@ const Profile = () => {
   const displayCounty = user?.county || "";
   const displayCountry = user?.country || "";
   const displayRoles = user?.roles || [];
+
+  useEffect(() => { setCountry(user?.country || ""); setCounty(user?.county || ""); }, [user?.country, user?.county]);
 
   useEffect(() => {
     if (!supabaseUser) return;
@@ -71,7 +75,7 @@ const Profile = () => {
     if (!supabaseUser) return;
     setSaving(true);
     try {
-      await updateProfile({ bio });
+      await updateProfile({ bio, country, county });
       toast({ title: "Profile updated" });
       setEditing(false);
     } catch (err: any) {
@@ -160,6 +164,18 @@ const Profile = () => {
               <p className="text-sm text-muted-foreground">{bio || "No bio yet. Click Edit Profile to add one."}</p>
             )}
             {editing && <p className="text-xs text-muted-foreground mt-1">{bio.length}/160</p>}
+            {editing && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div><Label>Country</Label><Select value={country} onValueChange={v => { setCountry(v); setCounty(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Choose country" /></SelectTrigger>
+                  <SelectContent>{countries.map(c => <SelectItem key={c.name} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent>
+                </Select></div>
+                <div><Label>County / Region</Label><Select value={county} onValueChange={setCounty} disabled={!country}>
+                  <SelectTrigger><SelectValue placeholder="Choose county / region" /></SelectTrigger>
+                  <SelectContent>{countries.find(c => c.name === country)?.counties.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select></div>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center mb-6">
