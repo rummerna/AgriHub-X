@@ -96,7 +96,7 @@ const AuctionDetail = () => {
         fetchBids();
         fetchAuction();
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "auctions", filter: `id=eq.${id}` }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "auction_changes", filter: `id=eq.${id}` }, () => {
         fetchAuction();
       })
       .subscribe();

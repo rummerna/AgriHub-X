@@ -18,9 +18,10 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !anonKey || !serviceKey) return json({ error: "Payment service is not configured" }, 503);
 
     // --- Authentication: require a valid signed-in user ---
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -57,13 +58,14 @@ serve(async (req) => {
     // --- Authorization: caller must own the order ---
     const { data: order } = await admin
       .from("orders")
-      .select("id, user_id, status, total_amount, mpesa_checkout_request_id, mpesa_requested_at")
+      .select("id, user_id, status, total_amount, currency, mpesa_checkout_request_id, mpesa_requested_at")
       .eq("id", orderId)
       .maybeSingle();
 
     if (!order || order.user_id !== user.id) {
       return json({ error: "Order not found" }, 404);
     }
+    if (order.currency !== "KES") return json({ error: "M-PESA requires a KES order" }, 400);
     if (!["pending", "pending_payment", "negotiating"].includes(order.status)) {
       return json({ error: "Order is not payable" }, 400);
     }
@@ -92,7 +94,7 @@ serve(async (req) => {
     const CALLBACK_SECRET = Deno.env.get("MPESA_CALLBACK_SECRET") || "";
     const CALLBACK_URL = Deno.env.get("MPESA_CALLBACK_URL");
 
-    if (!CONSUMER_KEY || !CONSUMER_SECRET || !PASSKEY) {
+    if (!CONSUMER_KEY || !CONSUMER_SECRET || !PASSKEY || !CALLBACK_SECRET) {
       return json({ error: "M-PESA credentials not configured" }, 500);
     }
 
