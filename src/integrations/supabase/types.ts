@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      auction_changes: {
+        Row: {
+          changed_at: string
+          id: string
+        }
+        Insert: {
+          changed_at?: string
+          id: string
+        }
+        Update: {
+          changed_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       auction_integrity: {
         Row: {
           id: string
@@ -230,6 +245,8 @@ export type Database = {
           id: string
           is_archived_by_1: boolean
           is_archived_by_2: boolean
+          is_deleted_by_1: boolean
+          is_deleted_by_2: boolean
           last_message_at: string | null
           last_message_text: string | null
           last_sender_id: string | null
@@ -242,6 +259,8 @@ export type Database = {
           id?: string
           is_archived_by_1?: boolean
           is_archived_by_2?: boolean
+          is_deleted_by_1?: boolean
+          is_deleted_by_2?: boolean
           last_message_at?: string | null
           last_message_text?: string | null
           last_sender_id?: string | null
@@ -254,6 +273,8 @@ export type Database = {
           id?: string
           is_archived_by_1?: boolean
           is_archived_by_2?: boolean
+          is_deleted_by_1?: boolean
+          is_deleted_by_2?: boolean
           last_message_at?: string | null
           last_message_text?: string | null
           last_sender_id?: string | null
@@ -569,6 +590,7 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          currency: string | null
           delivery_address: string | null
           delivery_fee: number
           id: string
@@ -588,6 +610,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string | null
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
@@ -607,6 +630,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string | null
           delivery_address?: string | null
           delivery_fee?: number
           id?: string
@@ -704,6 +728,7 @@ export type Database = {
           price: number
           quality_grade: string | null
           quantity: number | null
+          status: string
           title: string
           unit: string | null
           updated_at: string
@@ -723,6 +748,7 @@ export type Database = {
           price: number
           quality_grade?: string | null
           quantity?: number | null
+          status?: string
           title: string
           unit?: string | null
           updated_at?: string
@@ -742,6 +768,7 @@ export type Database = {
           price?: number
           quality_grade?: string | null
           quantity?: number | null
+          status?: string
           title?: string
           unit?: string | null
           updated_at?: string
@@ -1230,6 +1257,7 @@ export type Database = {
       }
     }
     Functions: {
+      get_auction_reserve: { Args: { _auction_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1249,6 +1277,14 @@ export type Database = {
           total: number
         }[]
       }
+      place_order: {
+        Args: {
+          _delivery_address: string
+          _items: Json
+          _payment_method: string
+        }
+        Returns: string[]
+      }
       record_mpesa_callback_event: {
         Args: {
           _amount?: number
@@ -1259,6 +1295,10 @@ export type Database = {
           _reason?: string
           _result_code?: number
         }
+        Returns: undefined
+      }
+      seller_update_order_status: {
+        Args: { _order_id: string; _status: string }
         Returns: undefined
       }
     }
