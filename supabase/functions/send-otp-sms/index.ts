@@ -90,7 +90,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
     if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
-      return json({ success: false, error: "SMS not configured", fallback: "email" });
+      return json({ success: false, error: "SMS is not configured yet. Please use email verification.", fallback: "email" }, 503);
     }
 
     const fromNumber = Deno.env.get("TWILIO_FROM");
@@ -98,20 +98,17 @@ serve(async (req) => {
 
     const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const id = crypto.randomUUID();
 
     const { data: inserted, error: insertErr } = await admin
       .from("phone_otp_codes")
-      .insert({ user_id: user.id, phone, code_hash: "pending", expires_at: expiresAt })
+      .insert({ id, user_id: user.id, phone, code_hash: await hashCode(otp, id), expires_at: expiresAt })
       .select("id")
       .single();
     if (insertErr || !inserted) {
-
-      return json({ success: false, error: "Could not send code", fallback: "email" });
+      if (insertErr?.code === "P0001") return json({ success: false, error: insertErr.message }, 429);
+      return json({ success: false, error: "Could not send code", fallback: "email" }, 503);
     }
-    await admin
-      .from("phone_otp_codes")
-      .update({ code_hash: await hashCode(otp, inserted.id) })
-      .eq("id", inserted.id);
 
 
     const response = await fetch(`${GATEWAY_URL}/Messages.json`, {

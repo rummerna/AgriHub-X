@@ -8,6 +8,28 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAUL
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS is_deleted_by_1 boolean NOT NULL DEFAULT false;
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS is_deleted_by_2 boolean NOT NULL DEFAULT false;
 
+-- Serialize reservations for both identities so concurrent sends cannot evade the limits.
+CREATE INDEX IF NOT EXISTS phone_otp_user_created_idx ON public.phone_otp_codes(user_id,created_at);
+CREATE INDEX IF NOT EXISTS phone_otp_phone_created_idx ON public.phone_otp_codes(phone,created_at);
+CREATE OR REPLACE FUNCTION public.limit_phone_otp_sends() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('otp-user:'||NEW.user_id::text,0));
+  PERFORM pg_advisory_xact_lock(hashtextextended('otp-phone:'||NEW.phone,0));
+  IF (SELECT count(*) FROM public.phone_otp_codes WHERE user_id=NEW.user_id AND created_at>now()-interval '1 hour')>=3 THEN
+    RAISE EXCEPTION 'You have requested 3 codes this hour. Please wait before requesting another.' USING ERRCODE='P0001';
+  END IF;
+  IF (SELECT count(*) FROM public.phone_otp_codes WHERE phone=NEW.phone AND created_at>now()-interval '1 day')>=5 THEN
+    RAISE EXCEPTION 'This phone has received 5 code requests today. Please try again tomorrow.' USING ERRCODE='P0001';
+  END IF;
+  NEW.created_at:=now();
+  RETURN NEW;
+END $$;
+CREATE TRIGGER limit_phone_otp_sends BEFORE INSERT ON public.phone_otp_codes FOR EACH ROW EXECUTE FUNCTION public.limit_phone_otp_sends();
+REVOKE ALL ON FUNCTION public.limit_phone_otp_sends() FROM PUBLIC,anon,authenticated;
+GRANT ALL ON public.phone_otp_codes TO service_role;
+GRANT ALL ON public.orders,public.order_items,public.products,public.auctions,public.notifications TO service_role;
+
 CREATE OR REPLACE FUNCTION public.protect_order_fields() RETURNS trigger
 LANGUAGE plpgsql SET search_path=public AS $$
 DECLARE allowed_cancel boolean;
