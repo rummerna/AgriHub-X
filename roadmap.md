@@ -4,7 +4,7 @@
 
 - [ ] Apply one migration for order pricing/protection, seller transitions, auctions, reviews, chat access/read receipts, and location defaults.
 - [ ] Update Checkout, Orders, auction/chat clients, OTP generation/configuration, and dashboard location prompt.
-- [ ] OTP send limits: waiting for confirmation of custom rate-limiting tradeoff.
+- [ ] Implement confirmed database OTP send limits: 3 per user/hour, 5 per phone/day, friendly HTTP 429.
 - [ ] Run existing/new tests and authenticated verification; report changed files and remaining limitations.
 
 # Footer destination audit

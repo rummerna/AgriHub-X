@@ -8,7 +8,7 @@ import { Package, Truck, CheckCircle, Clock, XCircle, ShoppingCart, Loader2, Arr
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { canBuyerCancel, sellerTransitions } from "@/lib/orderFlow";
+import { canBuyerCancel, sellerTransitions, type SellerStatusRpc } from "@/lib/orderFlow";
 
 interface OrderItem {
   id: string;
@@ -53,8 +53,9 @@ const Orders = () => {
   const { toast } = useToast();
   const updateStatus = async (order: Order, status: string, seller: boolean) => {
     setUpdating(order.id);
+    const sellerRpc = supabase.rpc.bind(supabase) as unknown as SellerStatusRpc;
     const { error } = seller
-      ? await supabase.rpc("seller_update_order_status", { _order_id: order.id, _status: status })
+      ? await sellerRpc("seller_update_order_status", { _order_id: order.id, _status: status })
       : await supabase.from("orders").update({ status }).eq("id", order.id).select("id").single();
     if (error) toast({ title: "Could not update order", description: error.message, variant: "destructive" });
     else setRevision(v => v + 1);

@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ContactReach from "@/components/ContactReach";
-import { submitOrder } from "@/lib/orderFlow";
+import { submitOrder, type OrderRpc } from "@/lib/orderFlow";
 
 const paymentMethods = [
   { id: "mpesa", label: "M-PESA", desc: "Pay via M-PESA" },
@@ -40,7 +40,8 @@ const Checkout = () => {
     if (!supabaseUser || items.length === 0) return;
     setPlacing(true);
     try {
-      const ids = await submitOrder((name, args) => supabase.rpc(name, args), items, paymentMethod, address);
+      const rpc = supabase.rpc.bind(supabase) as unknown as OrderRpc;
+      const ids = await submitOrder(rpc, items, paymentMethod, address);
       await clearCart();
       setOrderId(ids.map(id => id.slice(0, 8).toUpperCase()).join(", #"));
       setOrderComplete(true);

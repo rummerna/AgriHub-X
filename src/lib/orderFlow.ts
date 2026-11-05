@@ -14,8 +14,11 @@ export function orderRequest(items: { product_id: string; quantity: number }[], 
   });
 }
 
+export type OrderRpc = (name: "place_order", args: ReturnType<typeof orderRequest>) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+export type SellerStatusRpc = (name: "seller_update_order_status", args: { _order_id: string; _status: string }) => PromiseLike<{ error: { message: string } | null }>;
+
 export async function submitOrder(
-  rpc: (name: "place_order", args: ReturnType<typeof orderRequest>) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+  rpc: OrderRpc,
   items: { product_id: string; quantity: number }[], payment: string, address: string,
 ): Promise<string[]> {
   const { data, error } = await rpc("place_order", orderRequest(items, payment, address));
