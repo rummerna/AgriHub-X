@@ -8,4 +8,6 @@
 - Mount the route scroll-reset component inside BrowserRouter above Routes. Why: app, auth and fallback destinations all need the same navigation scroll behavior.
 - Orders are created only through authenticated place_order; status changes use guarded buyer updates or seller_update_order_status. Why: transaction pricing, stock locks and trust fields must not depend on the client.
 - Auction clients use the explicit public column list and the seller-authorized reserve RPC; bid mutations are trigger-owned. Why: reserves stay private and concurrent bids stay atomic.
+- Auction Realtime uses identifier-only auction_changes signals followed by public-column refetches. Why: publishing a reserve-bearing row conflicts with restricted column grants.
+- OTP insert limits are enforced under database advisory locks on user and phone identities. Why: concurrent function requests must not evade timestamp-based limits.
 - Conversation deletion uses participant-specific flags, and message updates are read-receipt-only. Why: one participant cannot destroy or rewrite the other participant's history.

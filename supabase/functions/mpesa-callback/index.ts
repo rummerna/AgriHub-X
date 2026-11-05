@@ -18,10 +18,10 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return new Response("Payment service is not configured", { status: 503, headers: corsHeaders });
+  const supabaseClient = createClient(url, key);
 
   // Records the outcome of this callback and lets the database raise alerts
   // when failure rates, duplicates or mismatched payloads spike.
@@ -85,7 +85,7 @@ serve(async (req) => {
     const { data: order } = await supabaseClient
       .from("orders")
       .select(
-        "id, user_id, status, total_amount, mpesa_amount_expected, mpesa_merchant_request_id, mpesa_receipt, mpesa_requested_at"
+        "id, user_id, status, currency, total_amount, mpesa_amount_expected, mpesa_merchant_request_id, mpesa_receipt, mpesa_requested_at"
       )
       .eq("mpesa_checkout_request_id", checkoutRequestId)
       .maybeSingle();
@@ -98,9 +98,10 @@ serve(async (req) => {
 
     // The MerchantRequestID recorded at push time must also match when we have one.
     if (
-      order.mpesa_merchant_request_id &&
-      typeof merchantRequestId === "string" &&
-      merchantRequestId !== order.mpesa_merchant_request_id
+      !order.mpesa_merchant_request_id ||
+      typeof merchantRequestId !== "string" ||
+      merchantRequestId !== order.mpesa_merchant_request_id ||
+      order.currency !== "KES" || !Number.isInteger(resultCode)
     ) {
       console.warn("MerchantRequestID mismatch for order", order.id);
       await monitor("mismatch", "merchant_request_id_mismatch", {
@@ -131,7 +132,8 @@ serve(async (req) => {
           .from("orders")
           .update({ mpesa_checkout_request_id: null, mpesa_requested_at: null })
           .eq("id", order.id)
-          .neq("status", "paid");
+          .eq("mpesa_checkout_request_id", checkoutRequestId)
+          .in("status", ["pending", "pending_payment", "negotiating"]);
       }
       await monitor("failed", `result_code_${resultCode}`, {
         orderId: order.id,
@@ -186,7 +188,8 @@ serve(async (req) => {
       .update({ status: "paid", mpesa_receipt: mpesaRef, paid_at: new Date().toISOString() })
       .eq("id", order.id)
       .eq("mpesa_checkout_request_id", checkoutRequestId)
-      .neq("status", "paid")
+      .eq("mpesa_merchant_request_id", merchantRequestId)
+      .in("status", ["pending", "pending_payment", "negotiating"])
       .select("id");
 
     if (updErr) {

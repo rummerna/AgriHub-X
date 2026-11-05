@@ -45,8 +45,9 @@ const AuctionDetail = () => {
       setAuction(data);
       setReservePrice(null);
       if (supabaseUser?.id === data.seller_id) {
-        const { data: reserve } = await supabase.rpc("get_auction_reserve", { _auction_id: data.id });
-        setReservePrice(reserve);
+        const reserveRpc = supabase.rpc.bind(supabase) as unknown as (name: "get_auction_reserve", args: { _auction_id: string }) => PromiseLike<{ data: unknown }>;
+        const { data: reserve } = await reserveRpc("get_auction_reserve", { _auction_id: data.id });
+        setReservePrice(typeof reserve === "number" ? reserve : null);
       }
       // Get seller name
       const { data: profile } = await supabase.from("profiles_public").select("full_name").eq("user_id", data.seller_id).single();
@@ -95,7 +96,7 @@ const AuctionDetail = () => {
         fetchBids();
         fetchAuction();
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "auctions", filter: `id=eq.${id}` }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "auction_changes", filter: `id=eq.${id}` }, () => {
         fetchAuction();
       })
       .subscribe();

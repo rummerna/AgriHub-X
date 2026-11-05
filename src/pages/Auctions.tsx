@@ -84,7 +84,7 @@ const Auctions = () => {
     // Realtime subscription
     const channel = supabase
       .channel("auctions-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "auctions" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "auction_changes" }, () => {
         fetchAuctions();
       })
       .subscribe();

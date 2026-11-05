@@ -8,6 +8,28 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAUL
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS is_deleted_by_1 boolean NOT NULL DEFAULT false;
 ALTER TABLE public.conversations ADD COLUMN IF NOT EXISTS is_deleted_by_2 boolean NOT NULL DEFAULT false;
 
+-- Serialize reservations for both identities so concurrent sends cannot evade the limits.
+CREATE INDEX IF NOT EXISTS phone_otp_user_created_idx ON public.phone_otp_codes(user_id,created_at);
+CREATE INDEX IF NOT EXISTS phone_otp_phone_created_idx ON public.phone_otp_codes(phone,created_at);
+CREATE OR REPLACE FUNCTION public.limit_phone_otp_sends() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('otp-user:'||NEW.user_id::text,0));
+  PERFORM pg_advisory_xact_lock(hashtextextended('otp-phone:'||NEW.phone,0));
+  IF (SELECT count(*) FROM public.phone_otp_codes WHERE user_id=NEW.user_id AND created_at>now()-interval '1 hour')>=3 THEN
+    RAISE EXCEPTION 'You have requested 3 codes this hour. Please wait before requesting another.' USING ERRCODE='P0001';
+  END IF;
+  IF (SELECT count(*) FROM public.phone_otp_codes WHERE phone=NEW.phone AND created_at>now()-interval '1 day')>=5 THEN
+    RAISE EXCEPTION 'This phone has received 5 code requests today. Please try again tomorrow.' USING ERRCODE='P0001';
+  END IF;
+  NEW.created_at:=now();
+  RETURN NEW;
+END $$;
+CREATE TRIGGER limit_phone_otp_sends BEFORE INSERT ON public.phone_otp_codes FOR EACH ROW EXECUTE FUNCTION public.limit_phone_otp_sends();
+REVOKE ALL ON FUNCTION public.limit_phone_otp_sends() FROM PUBLIC,anon,authenticated;
+GRANT ALL ON public.phone_otp_codes TO service_role;
+GRANT ALL ON public.orders,public.order_items,public.products,public.auctions,public.notifications TO service_role;
+
 CREATE OR REPLACE FUNCTION public.protect_order_fields() RETURNS trigger
 LANGUAGE plpgsql SET search_path=public AS $$
 DECLARE allowed_cancel boolean;
@@ -66,6 +88,7 @@ BEGIN
     IF curr IS NOT NULL AND curr<>product_currency THEN RAISE EXCEPTION 'Mixed-currency carts are not supported. Order one currency at a time.'; END IF;
     curr:=product_currency;
   END LOOP;
+  IF _payment_method='mpesa' AND curr<>'KES' THEN RAISE EXCEPTION 'M-PESA requires a KES order. Choose seller-arranged payment for this currency.'; END IF;
   FOR seller IN SELECT DISTINCT p.user_id FROM public.products p JOIN jsonb_array_elements(_items) j ON p.id=(j->>'product_id')::uuid ORDER BY p.user_id LOOP
     SELECT sum(p.price*(j->>'quantity')::numeric) INTO total FROM public.products p
       JOIN jsonb_array_elements(_items) j ON p.id=(j->>'product_id')::uuid WHERE p.user_id=seller.user_id;
@@ -124,6 +147,26 @@ DO $$ DECLARE cols text; BEGIN
     WHERE table_schema='public' AND table_name='auctions' AND column_name<>'reserve_price';
   EXECUTE 'GRANT SELECT ('||cols||') ON public.auctions TO anon,authenticated';
 END $$;
+-- A data-free public change stream keeps Realtime compatible without exposing reserves.
+CREATE TABLE public.auction_changes (
+  id uuid PRIMARY KEY,
+  changed_at timestamptz NOT NULL DEFAULT now()
+);
+GRANT SELECT ON public.auction_changes TO anon,authenticated;
+GRANT ALL ON public.auction_changes TO service_role;
+ALTER TABLE public.auction_changes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public auction change signals" ON public.auction_changes FOR SELECT TO anon,authenticated USING(true);
+INSERT INTO public.auction_changes(id) SELECT id FROM public.auctions;
+CREATE OR REPLACE FUNCTION public.signal_auction_change() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+  INSERT INTO public.auction_changes(id,changed_at) VALUES(NEW.id,clock_timestamp())
+  ON CONFLICT(id) DO UPDATE SET changed_at=EXCLUDED.changed_at;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER signal_auction_change AFTER INSERT OR UPDATE ON public.auctions FOR EACH ROW EXECUTE FUNCTION public.signal_auction_change();
+REVOKE ALL ON FUNCTION public.signal_auction_change() FROM PUBLIC,anon,authenticated;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.auction_changes;
 CREATE OR REPLACE FUNCTION public.get_auction_reserve(_auction_id uuid) RETURNS numeric
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
 DECLARE a public.auctions%ROWTYPE;
@@ -177,6 +220,9 @@ USING(bucket_id='chat-images' AND ((storage.foldername(name))[1]=auth.uid()::tex
  SELECT 1 FROM public.conversations c WHERE (c.participant_1_id=auth.uid() AND c.participant_2_id::text=(storage.foldername(name))[1])
  OR (c.participant_2_id=auth.uid() AND c.participant_1_id::text=(storage.foldername(name))[1]))));
 GRANT UPDATE ON public.messages TO authenticated;
+DROP POLICY IF EXISTS "Users send messages in own conversations" ON public.messages;
+CREATE POLICY "Users send messages in own conversations" ON public.messages FOR INSERT TO authenticated
+WITH CHECK(sender_id=auth.uid() AND is_read=false AND EXISTS(SELECT 1 FROM public.conversations c WHERE c.id=conversation_id AND auth.uid() IN(c.participant_1_id,c.participant_2_id)));
 CREATE POLICY "Recipients mark messages read" ON public.messages FOR UPDATE TO authenticated
 USING(sender_id<>auth.uid() AND EXISTS(SELECT 1 FROM public.conversations c WHERE c.id=conversation_id AND auth.uid() IN(c.participant_1_id,c.participant_2_id)))
 WITH CHECK(is_read=true AND sender_id<>auth.uid() AND EXISTS(SELECT 1 FROM public.conversations c WHERE c.id=conversation_id AND auth.uid() IN(c.participant_1_id,c.participant_2_id)));

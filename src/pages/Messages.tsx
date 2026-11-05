@@ -89,7 +89,8 @@ const Messages = () => {
       unreadMap.set(m.conversation_id, (unreadMap.get(m.conversation_id) || 0) + 1);
     });
 
-    const convs: Conversation[] = data.filter(c => c.participant_1_id === uid ? !c.is_deleted_by_1 : !c.is_deleted_by_2).map((c: any) => {
+    const records = data as (typeof data[number] & { is_deleted_by_1?: boolean; is_deleted_by_2?: boolean })[];
+    const convs: Conversation[] = records.filter(c => c.participant_1_id === uid ? !c.is_deleted_by_1 : !c.is_deleted_by_2).map((c: any) => {
       const otherId = c.participant_1_id === uid ? c.participant_2_id : c.participant_1_id;
       const prof = profileMap.get(otherId);
       const isP1 = c.participant_1_id === uid;
@@ -164,7 +165,8 @@ const Messages = () => {
       // Mark unread as read
       const unreadIds = data.filter((m: any) => !m.is_read && m.sender_id !== uid).map((m: any) => m.id);
       if (unreadIds.length > 0) {
-        await supabase.from("messages").update({ is_read: true }).in("id", unreadIds);
+        const { error } = await supabase.from("messages").update({ is_read: true }).in("id", unreadIds);
+        if (!error) await fetchConversations();
       }
     }
     setMsgLoading(false);
@@ -215,12 +217,12 @@ const Messages = () => {
   // Search users for new conversation
   const searchUsers = async (q: string) => {
     setNewSearch(q);
-    if (q.length < 2) { setSearchResults([]); return; }
+    if (!uid || q.length < 2) { setSearchResults([]); return; }
     const { data } = await supabase
       .from("profiles_public")
       .select("user_id, full_name, avatar_url")
       .ilike("full_name", `%${q}%`)
-      .neq("user_id", uid!)
+      .neq("user_id", uid)
       .limit(10);
     setSearchResults(data || []);
   };
@@ -250,9 +252,14 @@ const Messages = () => {
         .or(`and(participant_1_id.eq.${p1},participant_2_id.eq.${p2}),and(participant_1_id.eq.${p2},participant_2_id.eq.${p1})`)
         .single();
       if (existing2) {
+        const field = existing2.participant_1_id === uid ? "is_deleted_by_1" : "is_deleted_by_2";
+        await supabase.from("conversations").update({ [field]: false }).eq("id", existing2.id);
         await fetchConversations();
-        const conv = conversations.find((c) => c.otherUserId === otherUserId);
-        if (conv) openConv(conv);
+        const prof = searchResults.find(p => p.user_id === otherUserId);
+        openConv({ id: existing2.id, otherUserId, otherName: prof?.full_name || "Unknown", otherAvatar: prof?.avatar_url || null,
+          lastMessage: existing2.last_message_text, lastMessageAt: existing2.last_message_at || existing2.created_at,
+          lastSenderId: existing2.last_sender_id, unreadCount: 0,
+          isArchived: existing2.participant_1_id === uid ? existing2.is_archived_by_1 : existing2.is_archived_by_2 });
       }
       return;
     }
