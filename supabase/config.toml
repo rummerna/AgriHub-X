@@ -2,3 +2,6 @@ project_id = "rvanyvorxmobojknpbhp"
 
 [functions.ask-agri-ai]
 verify_jwt = false
+
+[functions.mpesa-callback]
+verify_jwt = false
