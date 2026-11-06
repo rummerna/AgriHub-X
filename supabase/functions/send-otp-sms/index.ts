@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
-import { generateOtp } from "./code.ts";
+import { generateOtp, otpInsertFailure } from "./code.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
 
@@ -106,8 +106,8 @@ serve(async (req) => {
       .select("id")
       .single();
     if (insertErr || !inserted) {
-      if (insertErr?.code === "P0001") return json({ success: false, error: insertErr.message }, 429);
-      return json({ success: false, error: "Could not send code", fallback: "email" }, 503);
+      const failure = otpInsertFailure(insertErr);
+      return json(failure.body, failure.status);
     }
 
 
