@@ -2,10 +2,17 @@
 
 # Security and payment batch 1
 
-- [ ] Apply one migration for order pricing/protection, seller transitions, auctions, reviews, chat access/read receipts, and location defaults.
-- [ ] Update Checkout, Orders, auction/chat clients, OTP generation/configuration, and dashboard location prompt.
-- [ ] Implement confirmed database OTP send limits: 3 per user/hour, 5 per phone/day, friendly HTTP 429.
-- [ ] Run existing/new tests and authenticated verification; report changed files and remaining limitations.
+- [x] Apply one migration for order pricing/protection, seller transitions, auctions, reviews, chat access/read receipts, and location defaults.
+- [x] Update Checkout, Orders, auction/chat clients, OTP generation/configuration, and dashboard location prompt.
+- [x] Implement confirmed database OTP send limits: 3 per user/hour, 5 per phone/day, friendly HTTP 429.
+- [x] Run existing/new tests and authenticated verification; report changed files and remaining limitations.
+
+# Agent integrations (MCP)
+
+- [ ] Add caller-protected app MCP tools for marketplace products, active auctions, and the signed-in user's orders.
+- [ ] Add an app-native OAuth consent flow and preserve its return path through login and signup.
+- [ ] Add read/search/open browser tools to the marketplace using the existing UI actions.
+- [ ] Extract the MCP manifest and verify the preview build and tests.
 
 # Footer destination audit
 
