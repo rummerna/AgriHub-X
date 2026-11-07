@@ -11,3 +11,4 @@
 - Auction Realtime uses identifier-only auction_changes signals followed by public-column refetches. Why: publishing a reserve-bearing row conflicts with restricted column grants.
 - OTP insert limits are enforced under database advisory locks on user and phone identities. Why: concurrent function requests must not evade timestamp-based limits.
 - Conversation deletion uses participant-specific flags, and message updates are read-receipt-only. Why: one participant cannot destroy or rewrite the other participant's history.
+- App-hosted agent tools live in `src/lib/mcp/`, use caller-scoped auth and existing RLS; browser tools use `useWebMCP` beside their controls. Why: remote and in-tab agents must preserve the same user permissions and UI behavior.
