@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +9,15 @@ import { LogoMark } from "@/components/brand/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = oauthReturnPath(searchParams.get("next"));
   const { login } = useAuth();
   const { toast } = useToast();
 
@@ -23,6 +26,11 @@ const Login = () => {
     setIsLoading(true);
     try {
       await login(email, password);
+
+      if (returnTo !== "/") {
+        navigate(returnTo);
+        return;
+      }
 
       // Check if onboarding is complete (has country set)
       const { data: { user } } = await supabase.auth.getUser();
@@ -68,7 +76,7 @@ const Login = () => {
             </Button>
           </form>
           <p className="text-center text-sm mt-4 text-muted-foreground">
-            Don't have an account? <Link to="/auth/signup" className="text-primary font-semibold hover:underline">Sign Up</Link>
+            Don't have an account? <Link to={returnTo === "/" ? "/auth/signup" : `/auth/signup?next=${encodeURIComponent(returnTo)}`} className="text-primary font-semibold hover:underline">Sign Up</Link>
           </p>
         </CardContent>
       </Card>

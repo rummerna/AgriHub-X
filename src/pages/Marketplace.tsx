@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 const mainCategories = ["All", "Crops", "Livestock", "Inputs", "Equipment"];
 
@@ -74,6 +76,67 @@ const Marketplace = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const setMarketplaceFilters = (input: { query?: unknown; category?: unknown }) => {
+    const allowedCategories = [...mainCategories];
+    if (input.query !== undefined && typeof input.query !== "string") {
+      throw new Error("Search text must be a string.");
+    }
+    if (input.category !== undefined && (typeof input.category !== "string" || !allowedCategories.includes(input.category))) {
+      throw new Error("Unknown category; choose All, Crops, Livestock, Inputs, or Equipment.");
+    }
+    if (typeof input.query === "string") setSearchQuery(input.query);
+    if (typeof input.category === "string") setActiveCategory(input.category);
+  };
+
+  const openVisibleProduct = (id: unknown) => {
+    if (typeof id !== "string" || !id) throw new Error("A product ID is required.");
+    const product = filtered.find((item) => item.id === id);
+    if (!product) throw new Error("That product is not in the current marketplace view.");
+    navigate(`/marketplace/${product.id}`);
+    return `Opened ${product.title}.`;
+  };
+
+  useWebMCP<{ query?: string; category?: string }, string>({
+    name: "filter_marketplace",
+    description: "Change the marketplace search and category currently shown on this page.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Optional product or seller search text." },
+        category: { type: "string", enum: mainCategories, description: "Optional marketplace category." },
+      },
+    },
+    execute: (args) => runWebMCPTool("filter_marketplace", () => {
+      setMarketplaceFilters(args);
+      return "Marketplace filters updated.";
+    }),
+  });
+
+  useWebMCP<Record<string, never>, string>({
+    name: "list_visible_products",
+    description: "List products currently visible in the marketplace results, including IDs for opening a result.",
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    enabled: !loading,
+    execute: () => runWebMCPTool("list_visible_products", () =>
+      filtered.length
+        ? filtered.map((product) => `${product.id}: ${product.title} — ${formatPrice(product.price, product.currency)} (${product.category})`).join("\n")
+        : "No products are currently visible.",
+    ),
+  });
+
+  useWebMCP<{ id: string }, string>({
+    name: "open_marketplace_product",
+    description: "Open a product that is currently visible in the marketplace results by its listed ID.",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string", description: "The product ID from the visible product list." } },
+      required: ["id"],
+    },
+    annotations: { untrustedContentHint: true },
+    enabled: !loading,
+    execute: ({ id }) => runWebMCPTool("open_marketplace_product", () => openVisibleProduct(id)),
+  });
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <Seo title="Marketplace — Buy & Sell Crops, Livestock & Inputs | AgriHubX" description="Browse and list crops, livestock, fertilizers and equipment on the AgriHubX marketplace. Trusted sellers, fair pricing." path="/marketplace" />
@@ -113,12 +176,12 @@ const Marketplace = () => {
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="What do you need? Search products, sellers..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        <Input placeholder="What do you need? Search products, sellers..." className="pl-10" value={searchQuery} onChange={(e) => setMarketplaceFilters({ query: e.target.value })} />
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto lg:flex-wrap lg:overflow-visible pb-1">
         {mainCategories.map((cat) => (
-          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" className="shrink-0" onClick={() => setActiveCategory(cat)}>{cat}</Button>
+          <Button key={cat} variant={activeCategory === cat ? "default" : "outline"} size="sm" className="shrink-0" onClick={() => setMarketplaceFilters({ category: cat })}>{cat}</Button>
         ))}
         <Link to="/auctions" className="sm:hidden shrink-0 self-center">
           <Badge variant="outline" className="gap-1 py-1.5 px-3 text-xs font-semibold"><Gavel className="w-3 h-3" /> Live Auctions</Badge>
@@ -135,7 +198,7 @@ const Marketplace = () => {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {filtered.map((p) => (
-            <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${p.id}`)}>
+            <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openVisibleProduct(p.id)}>
               <div className="aspect-[4/3] bg-muted flex items-center justify-center">
                 <img src={p.image} alt={p.title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; (e.target as HTMLImageElement).className = "w-16 h-16 opacity-40"; }} />
               </div>

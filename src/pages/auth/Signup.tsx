@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import SignupCelebration from "@/components/SignupCelebration";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 const steps = ["Account", "Verify", "Location", "Role", "Currency"];
 
@@ -35,6 +36,8 @@ const Signup = () => {
   const [resending, setResending] = useState(false);
   const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = oauthReturnPath(searchParams.get("next"));
   const { signup, updateProfile, login } = useAuth();
   const { toast } = useToast();
 
@@ -47,7 +50,8 @@ const Signup = () => {
   const handleCreateAccount = async () => {
     setIsLoading(true);
     try {
-      await signup(email, password, { full_name: fullName, phone });
+      const emailRedirectTo = returnTo === "/" ? undefined : new URL(returnTo, window.location.origin).href;
+      await signup(email, password, { full_name: fullName, phone }, emailRedirectTo);
       setSignupDone(true);
 
       // If phone provided, attempt SMS OTP via Twilio edge function.
@@ -160,10 +164,10 @@ const Signup = () => {
   };
 
   if (showCelebration) {
-    return <SignupCelebration onComplete={() => navigate("/")} />;
+    return <SignupCelebration onComplete={() => navigate(returnTo)} />;
   }
 
-  return (
+    return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
@@ -319,7 +323,7 @@ const Signup = () => {
 
           {step === 0 && (
             <p className="text-center text-sm mt-4 text-muted-foreground">
-              Already have an account? <Link to="/auth/login" className="text-primary font-semibold hover:underline">Sign In</Link>
+              Already have an account? <Link to={returnTo === "/" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(returnTo)}`} className="text-primary font-semibold hover:underline">Sign In</Link>
             </p>
           )}
         </CardContent>
