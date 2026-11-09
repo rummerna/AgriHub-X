@@ -31,34 +31,38 @@ const OAuthConsent = () => {
   useEffect(() => {
     let active = true;
     void (async () => {
-      if (!authorizationId) {
-        setError("This connection request is missing its authorization details.");
-        return;
+      try {
+        if (!authorizationId) {
+          setError("This connection request is missing its authorization details.");
+          return;
+        }
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          setError("Your sign-in could not be checked. Please try again.");
+          return;
+        }
+        if (!sessionData.session) {
+          const next = window.location.pathname + window.location.search;
+          navigate(`/auth/login?next=${encodeURIComponent(next)}`, { replace: true });
+          return;
+        }
+        const { data: userData } = await supabase.auth.getUser();
+        const { data, error: detailsError } = await authOAuth.getAuthorizationDetails(authorizationId);
+        if (!active) return;
+        if (detailsError) {
+          setError("This connection request is invalid, expired, or could not be loaded.");
+          return;
+        }
+        const immediate = data?.redirect_url ?? data?.redirect_to;
+        if (immediate && !data?.client) {
+          window.location.assign(immediate);
+          return;
+        }
+        setAccountEmail(userData.user?.email ?? "Signed-in account");
+        setDetails(data);
+      } catch {
+        if (active) setError("This connection request could not be loaded. Please try again.");
       }
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        setError("Your sign-in could not be checked. Please try again.");
-        return;
-      }
-      if (!sessionData.session) {
-        const next = window.location.pathname + window.location.search;
-        navigate(`/auth/login?next=${encodeURIComponent(next)}`, { replace: true });
-        return;
-      }
-      const { data: userData } = await supabase.auth.getUser();
-      const { data, error: detailsError } = await authOAuth.getAuthorizationDetails(authorizationId);
-      if (!active) return;
-      if (detailsError) {
-        setError("This connection request is invalid, expired, or could not be loaded.");
-        return;
-      }
-      const immediate = data?.redirect_url ?? data?.redirect_to;
-      if (immediate && !data?.client) {
-        window.location.assign(immediate);
-        return;
-      }
-      setAccountEmail(userData.user?.email ?? "Signed-in account");
-      setDetails(data);
     })();
     return () => { active = false; };
   }, [authorizationId, navigate]);
@@ -66,9 +70,16 @@ const OAuthConsent = () => {
   async function decide(approve: boolean) {
     setBusy(true);
     setError(null);
-    const result = approve
-      ? await authOAuth.approveAuthorization(authorizationId)
-      : await authOAuth.denyAuthorization(authorizationId);
+    let result: Awaited<ReturnType<typeof authOAuth.approveAuthorization>>;
+    try {
+      result = approve
+        ? await authOAuth.approveAuthorization(authorizationId)
+        : await authOAuth.denyAuthorization(authorizationId);
+    } catch {
+      setError(approve ? "Approval could not be completed. Please retry or cancel the connection." : "The connection could not be cancelled. Please retry.");
+      setBusy(false);
+      return;
+    }
     if (result.error) {
       setError(approve ? "Approval could not be completed. Please retry or cancel the connection." : "The connection could not be cancelled. Please retry.");
       setBusy(false);
