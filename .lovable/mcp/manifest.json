@@ -22,8 +22,7 @@
         "title": "Search marketplace products",
         "description": "Find active, in-stock marketplace products, optionally by title and category.",
         "annotations": {
-          "readOnlyHint": true,
-          "untrustedContentHint": true
+          "readOnlyHint": true
         },
         "inputSchema": {
           "type": "object",
@@ -53,8 +52,7 @@
         "title": "List active auctions",
         "description": "List current active auctions using only public auction fields.",
         "annotations": {
-          "readOnlyHint": true,
-          "untrustedContentHint": true
+          "readOnlyHint": true
         },
         "inputSchema": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
