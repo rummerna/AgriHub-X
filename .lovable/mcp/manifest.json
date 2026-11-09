@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "sdk_version": "3.4.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://rvanyvorxmobojknpbhp.supabase.co/auth/v1",
+    "require_oauth_client_claim": true,
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "agrihub-x",
+      "version": "0.1.0",
+      "title": "AgriHub-X"
+    },
+    "tools": [
+      {
+        "name": "search_products",
+        "title": "Search marketplace products",
+        "description": "Find active, in-stock marketplace products, optionally by title and category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "untrustedContentHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Optional text to match against product titles."
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "Crops",
+                "Livestock",
+                "Inputs",
+                "Equipment"
+              ],
+              "description": "Optional marketplace category to filter by."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_active_auctions",
+        "title": "List active auctions",
+        "description": "List current active auctions using only public auction fields.",
+        "annotations": {
+          "readOnlyHint": true,
+          "untrustedContentHint": true
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_orders",
+        "title": "List my orders",
+        "description": "List orders created by the authenticated caller, with status and totals.",
+        "annotations": {
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
