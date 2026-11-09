@@ -39,6 +39,7 @@ import Orders from "./pages/Orders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import RequireAdmin from "./components/RequireAdmin";
 import ScrollToTop from "./components/ScrollToTop";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
           {/* Auth routes (no layout) */}
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
+          <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
 
           {/* App routes with layout */}
           <Route element={<AppLayout />}>

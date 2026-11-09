@@ -76,12 +76,12 @@ export const useAuth = () => {
     if (error) throw error;
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, metadata?: { full_name?: string; phone?: string }) => {
+  const signup = useCallback(async (email: string, password: string, metadata?: { full_name?: string; phone?: string }, redirectTo?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: redirectTo || window.location.origin,
         data: metadata,
       },
     });
