@@ -84,8 +84,8 @@ const Marketplace = () => {
     if (input.category !== undefined && (typeof input.category !== "string" || !allowedCategories.includes(input.category))) {
       throw new Error("Unknown category; choose All, Crops, Livestock, Inputs, or Equipment.");
     }
-    if (input.query !== undefined) setSearchQuery(input.query);
-    if (input.category !== undefined) setActiveCategory(input.category);
+    if (typeof input.query === "string") setSearchQuery(input.query);
+    if (typeof input.category === "string") setActiveCategory(input.category);
   };
 
   const openVisibleProduct = (id: unknown) => {

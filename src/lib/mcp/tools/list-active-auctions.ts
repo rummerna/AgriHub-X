@@ -6,7 +6,7 @@ export default defineTool({
   title: "List active auctions",
   description: "List current active auctions using only public auction fields.",
   inputSchema: {},
-  annotations: { readOnlyHint: true, untrustedContentHint: true },
+  annotations: { readOnlyHint: true },
   handler: async (_args, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Sign in to view active auctions." }], isError: true };
     const now = new Date().toISOString();

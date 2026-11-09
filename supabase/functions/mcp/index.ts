@@ -67,7 +67,7 @@ var search_products_default = defineTool({
     query: z.string().optional().describe("Optional text to match against product titles."),
     category: z.enum(categories).optional().describe("Optional marketplace category to filter by.")
   },
-  annotations: { readOnlyHint: true, untrustedContentHint: true },
+  annotations: { readOnlyHint: true },
   handler: async ({ query, category }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Sign in to search marketplace products." }], isError: true };
     const supabase = supabaseForUser(ctx);
@@ -100,7 +100,7 @@ var list_active_auctions_default = defineTool2({
   title: "List active auctions",
   description: "List current active auctions using only public auction fields.",
   inputSchema: {},
-  annotations: { readOnlyHint: true, untrustedContentHint: true },
+  annotations: { readOnlyHint: true },
   handler: async (_args, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Sign in to view active auctions." }], isError: true };
     const now = (/* @__PURE__ */ new Date()).toISOString();
