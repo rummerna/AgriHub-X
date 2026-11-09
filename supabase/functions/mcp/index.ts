@@ -162,7 +162,8 @@ var mcp_default = defineMcp({
   instructions: "AgriHub-X tools provide signed-in access to marketplace products, active auctions, and the caller's own orders. Product and auction data is subject to app permissions; order results are limited to the signed-in account.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
-    acceptedAudiences: "authenticated"
+    acceptedAudiences: "authenticated",
+    requireOAuthClientClaim: true
   }),
   tools: [search_products_default, list_active_auctions_default, list_my_orders_default]
 });
